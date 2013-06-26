@@ -74,6 +74,31 @@ function pmprosd_pmpro_profile_start_date($start_date, $order)
 }
 add_filter("pmpro_profile_start_date", "pmprosd_pmpro_profile_start_date", 10, 2);
 
+//treat levels like trials if they have start days
+function pmprosd_pmpro_subscribe_order($order, $gateway)
+{
+	if(!empty($order->discount_code))
+	{
+		global $wpdb;
+		
+		//get code id
+		$code_id = $wpdb->get_var("SELECT id FROM $wpdb->pmpro_discount_codes WHERE code = '" . $wpdb->escape($order->discount_code) . "' LIMIT 1");				
+		if(!empty($code_id))
+		{
+			//we have a code
+			$delays = pmpro_getDCSDs($code_id);
+			if(!empty($delays[$order->membership_id]))
+			{
+				//we have a delay for this level, remove the trial (the subscription delay is our trial)				
+				$order->TrialBillingCycles = 0;
+			}
+		}
+	}
+
+	return $order;
+}
+add_filter("pmpro_subscribe_order", "pmprosd_pmpro_subscribe_order", 10, 2);
+
 /*
 	Let's call these things "discount code subscription delays" or DCSDs.
 	
