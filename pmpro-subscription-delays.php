@@ -3,10 +3,40 @@
 Plugin Name: PMPro Subscription Delays
 Plugin URI: http://www.paidmembershipspro.com/wp/pmpro-subscription-delays/
 Description: Add a field to levels and discount codes to delay the start of a subscription by X days. (Add variable-length free trials to your levels.)
-Version: .1
+Version: .2
 Author: Stranger Studios
 Author URI: http://www.strangerstudios.com
 */
+
+//add subscription delay field to level price settings
+function pmprosd_pmpro_membership_level_after_other_settings()
+{
+	$level_id = intval($_REQUEST['edit']);
+	$delay = get_option("pmpro_subscription_delay_" . $level_id, "");
+?>
+<table>
+<tbody class="form-table">
+	<tr>
+		<td>
+			<tr>
+				<th scope="row" valign="top"><label for="subscription_delay">Subscription Delay:</label></th>
+				<td><input name="subscription_delay" type="text" size="20" value="<?php echo intval($delay);?>" /> <small># of days to delay the start of the subscription. If set, this will override any trial/etc defined above.</small></td>
+			</tr>
+		</td>
+	</tr> 
+</tbody>
+</table>
+<?php
+}
+add_action("pmpro_membership_level_after_other_settings", "pmprosd_pmpro_membership_level_after_other_settings");
+
+//save subscription delays for the code when the code is saved/added
+function pmprosd_pmpro_save_membership_level($level_id)
+{
+	$subscription_delay = $_REQUEST['subscription_delay'];	//subscription delays for levels checked
+	update_option("pmpro_subscription_delay_" . $level_id, $subscription_delay);
+}
+add_action("pmpro_save_membership_level", "pmprosd_pmpro_save_membership_level");
 
 //add subscription delay field to level price settings
 function pmprosd_pmpro_discount_code_after_level_settings($code_id, $level)
@@ -38,7 +68,7 @@ function pmprosd_pmpro_save_discount_code_level($code_id, $level_id)
 {
 	$all_levels_a = $_REQUEST['all_levels'];							//array of level ids checked for this code
 	$subscription_delay_a = $_REQUEST['subscription_delay'];	//subscription delays for levels checked
-		
+	
 	if(!empty($all_levels_a))
 	{	
 		$key = array_search($level_id, $all_levels_a);				//which level is it in the list?		
@@ -49,9 +79,10 @@ function pmprosd_pmpro_save_discount_code_level($code_id, $level_id)
 }
 add_action("pmpro_save_discount_code_level", "pmprosd_pmpro_save_discount_code_level", 10, 2);
 
-//update subscription start date based on the discount code used
+//update subscription start date based on the discount code used or levels subscription start date
 function pmprosd_pmpro_profile_start_date($start_date, $order)
 {
+	//if a discount code is used, we default to the setting there
 	if(!empty($order->discount_code))
 	{
 		global $wpdb;
@@ -67,6 +98,15 @@ function pmprosd_pmpro_profile_start_date($start_date, $order)
 				//we have a delay for this level, set the start date to X days out
 				$start_date = date("Y-m-d", strtotime("+ " . intval($delays[$order->membership_id]) . " Days")) . "T0:0:0";
 			}
+		}
+	}
+	else
+	{
+		//check the level for a subscription delay
+		$subscription_delay = get_option("pmpro_subscription_delay_" . $order->membership_id, "");
+		if(!empty($subscription_delay))
+		{
+			$start_date = date("Y-m-d", strtotime("+ " . intval($subscription_delay) . " Days")) . "T0:0:0";
 		}
 	}
 	
@@ -94,10 +134,54 @@ function pmprosd_pmpro_subscribe_order($order, $gateway)
 			}
 		}
 	}
+	else
+	{
+		$subscription_delay = get_option("pmpro_subscription_delay_" . $order->membership_id, "");
+		if(!empty($subscription_delay))
+		{
+			$order->TrialBillingCycles = 0;
+		}
+	}
 
 	return $order;
 }
 add_filter("pmpro_subscribe_order", "pmprosd_pmpro_subscribe_order", 10, 2);
+
+/*
+	Add discount code and code id to the level object so we can use them later
+*/
+function pmprosd_pmpro_discount_code_level($level, $code_id)
+{
+	$level->discount_code_id = $code_id;
+	return $level;
+}
+add_filter("pmpro_discount_code_level", "pmprosd_pmpro_discount_code_level", 10, 2);
+
+/*
+	Change the Level Cost Text
+*/
+function pmprosd_level_cost_text($cost, $level)
+{
+	if(!empty($level->discount_code_id))
+	{
+		$all_delays = pmpro_getDCSDs($level->discount_code_id);
+		if(!empty($all_delays) && !empty($all_delays[$level->id]))
+			$subscription_delay = $all_delays[$level->id];
+	}
+	else
+	{
+		$subscription_delay = get_option("pmpro_subscription_delay_" . $level->id, "");
+	}
+	
+	if(!empty($subscription_delay))
+	{		
+		$cost = str_replace(array("Year.", "Month.", "Week."), array("Year", "Month", "Week"), $cost);
+		$cost .= " after your <strong>" . $subscription_delay . " day trial</strong>.";
+	}
+ 
+	return $cost;
+}
+add_filter("pmpro_level_cost_text", "pmprosd_level_cost_text", 10, 2);
 
 /*
 	Let's call these things "discount code subscription delays" or DCSDs.
