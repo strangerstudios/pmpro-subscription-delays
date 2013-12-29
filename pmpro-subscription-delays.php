@@ -152,7 +152,7 @@ add_filter("pmpro_subscribe_order", "pmprosd_pmpro_subscribe_order", 10, 2);
 */
 function pmprosd_pmpro_discount_code_level($level, $code_id)
 {
-	$level->discount_code_id = $code_id;
+	$level->code_id = $code_id;
 	return $level;
 }
 add_filter("pmpro_discount_code_level", "pmprosd_pmpro_discount_code_level", 10, 2);
@@ -162,9 +162,10 @@ add_filter("pmpro_discount_code_level", "pmprosd_pmpro_discount_code_level", 10,
 */
 function pmprosd_level_cost_text($cost, $level)
 {
-	if(!empty($level->discount_code_id))
+	if(!empty($level->code_id))
 	{
-		$all_delays = pmpro_getDCSDs($level->discount_code_id);
+		$all_delays = pmpro_getDCSDs($level->code_id);
+		
 		if(!empty($all_delays) && !empty($all_delays[$level->id]))
 			$subscription_delay = $all_delays[$level->id];
 	}
