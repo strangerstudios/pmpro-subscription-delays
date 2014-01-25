@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: PMPro Subscription Delays
+Plugin Name: PMPro Subscription Delays (Edited)
 Plugin URI: http://www.paidmembershipspro.com/wp/pmpro-subscription-delays/
 Description: Add a field to levels and discount codes to delay the start of a subscription by X days. (Add variable-length free trials to your levels.)
-Version: .2
+Version: .3.1
 Author: Stranger Studios
 Author URI: http://www.strangerstudios.com
 */
@@ -20,7 +20,7 @@ function pmprosd_pmpro_membership_level_after_other_settings()
 		<td>
 			<tr>
 				<th scope="row" valign="top"><label for="subscription_delay">Subscription Delay:</label></th>
-				<td><input name="subscription_delay" type="text" size="20" value="<?php echo intval($delay);?>" /> <small># of days to delay the start of the subscription. If set, this will override any trial/etc defined above.</small></td>
+				<td><input name="subscription_delay" type="text" size="20" value="<?php echo esc_attr($delay);?>" /> <small># of days to delay the start of the subscription. If set, this will override any trial/etc defined above.</small></td>
 			</tr>
 		</td>
 	</tr> 
@@ -53,7 +53,7 @@ function pmprosd_pmpro_discount_code_after_level_settings($code_id, $level)
 		<td>
 			<tr>
 				<th scope="row" valign="top"><label for="subscription_delay">Subscription Delay:</label></th>
-				<td><input name="subscription_delay[]" type="text" size="20" value="<?php echo intval($delay);?>" /> <small># of days to delay the start of the subscription. If set, this will override any trial/etc defined above.</small></td>
+				<td><input name="subscription_delay[]" type="text" size="20" value="<?php echo esc_attr($delay);?>" /> <small># of days to delay the start of the subscription. If set, this will override any trial/etc defined above.</small></td>
 			</tr>
 		</td>
 	</tr> 
@@ -81,7 +81,7 @@ add_action("pmpro_save_discount_code_level", "pmprosd_pmpro_save_discount_code_l
 
 //update subscription start date based on the discount code used or levels subscription start date
 function pmprosd_pmpro_profile_start_date($start_date, $order)
-{
+{		
 	//if a discount code is used, we default to the setting there
 	if(!empty($order->discount_code))
 	{
@@ -95,8 +95,13 @@ function pmprosd_pmpro_profile_start_date($start_date, $order)
 			$delays = pmpro_getDCSDs($code_id);
 			if(!empty($delays[$order->membership_id]))
 			{
+				if(!is_numeric($delays[$order->membership_id]))		
+					$subscription_delay = pmprosd_daysUntilDate($delays[$order->membership_id]);
+				else
+					$subscription_delay = $delays[$order->membership_id];
+				
 				//we have a delay for this level, set the start date to X days out
-				$start_date = date("Y-m-d", strtotime("+ " . intval($delays[$order->membership_id]) . " Days")) . "T0:0:0";
+				$start_date = date("Y-m-d", strtotime("+ " . intval($subscription_delay) . " Days")) . "T0:0:0";
 			}
 		}
 	}
@@ -104,15 +109,35 @@ function pmprosd_pmpro_profile_start_date($start_date, $order)
 	{
 		//check the level for a subscription delay
 		$subscription_delay = get_option("pmpro_subscription_delay_" . $order->membership_id, "");
+		
+		if(!is_numeric($subscription_delay))		
+			$subscription_delay = pmprosd_daysUntilDate($subscription_delay);
+		
 		if(!empty($subscription_delay))
 		{
 			$start_date = date("Y-m-d", strtotime("+ " . intval($subscription_delay) . " Days")) . "T0:0:0";
 		}
 	}
-	
+		
 	return $start_date;
 }
 add_filter("pmpro_profile_start_date", "pmprosd_pmpro_profile_start_date", 10, 2);
+
+/*
+	Calculate how many days until a certain date (e.g. in YYYY-MM-DD format)
+	
+	Some logic taken from: http://stackoverflow.com/a/654378/1154321
+*/
+function pmprosd_daysUntilDate($date)
+{
+	$datetime = strtotime($date);
+	$today = time();
+	$diff = $datetime - $today;
+	if($diff < 0)
+		return 0;
+	else
+		return floor($diff/60/60/24);
+}
 
 //treat levels like trials if they have start days
 function pmprosd_pmpro_subscribe_order($order, $gateway)
@@ -174,7 +199,7 @@ function pmprosd_level_cost_text($cost, $level)
 		$subscription_delay = get_option("pmpro_subscription_delay_" . $level->id, "");
 	}
 	
-	if(!empty($subscription_delay))
+	if(!empty($subscription_delay) && is_numeric($subscription_delay))
 	{		
 		$cost = str_replace(array("Year.", "Month.", "Week."), array("Year", "Month", "Week"), $cost);
 		$cost .= " after your <strong>" . $subscription_delay . " day trial</strong>.";

@@ -3,7 +3,7 @@ Contributors: strangerstudios
 Tags: paid memberships pro, pmpro, memberships, ecommerce
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: .2
+Stable tag: .3
 
 Adds a "delay" field to PMPro membership levels and discount codes to leve you add variable-length free trials to your PMPro levels.
 
@@ -20,6 +20,12 @@ Adds a "delay" field to PMPro membership levels and discount codes to leve you a
 1. That's it. No settings.
 
 == Changelog ==
+= .3.1 =
+* Fixed bug where specific date delays were showing up as integers (e.g. 2015-01-01 would become just 2015) on the edit levels page.
+
+= .3 =
+* Added ability to set a specific date for the delay. Use format YYYY-MM-DD and the plugin will calculate the # of days until that date and use that for the delay value.
+
 = .2 =
 * Now adds delay box to basic levels as well as discount codes.
 * Adds "after your X day trial" to the end of the level cost text.
