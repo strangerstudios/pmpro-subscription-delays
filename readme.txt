@@ -5,8 +5,7 @@ Requires at least: 3.0
 Tested up to: 3.5.1
 Stable tag: .3.1
 
-Adds a "delay" field to PMPro membership levels and discount codes to leve you add variable-length free trials to your PMPro levels.
-
+Adds a "delay" field to PMPro membership levels and discount codes, allowing you add variable-length free trials to your PMPro levels.
 
 == Description ==
 This plugin requires Paid Memberships Pro to function.
