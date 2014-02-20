@@ -3,7 +3,7 @@ Contributors: strangerstudios
 Tags: paid memberships pro, pmpro, memberships, ecommerce
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: .3.1
+Stable tag: .3.2
 
 Adds a "delay" field to PMPro membership levels and discount codes to leve you add variable-length free trials to your PMPro levels.
 
@@ -20,6 +20,9 @@ Adds a "delay" field to PMPro membership levels and discount codes to leve you a
 1. That's it. No settings.
 
 == Changelog ==
+= .3.2 =
+* Just removed the "edited" from the name.
+
 = .3.1 =
 * Fixed bug where specific date delays were showing up as integers (e.g. 2015-01-01 would become just 2015) on the edit levels page.
 
