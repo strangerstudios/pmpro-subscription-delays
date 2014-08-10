@@ -5,13 +5,17 @@ Requires at least: 3.0
 Tested up to: 3.5.1
 Stable tag: .3.2
 
-Adds a "delay" field to PMPro membership levels and discount codes to leve you add variable-length free trials to your PMPro levels.
-
+Adds a "delay" field to PMPro membership levels and discount codes, allowing you to set a variable-length period between your initial payment (if required) and recurring subscription payment.
 
 == Description ==
 This plugin requires Paid Memberships Pro to function.
 
-Adds a "delay" field to PMPro membership levels and discount codes to leve you add variable-length free trials to your PMPro levels.
+Adds a "delay" field to PMPro membership levels and discount codes, allowing you to set a variable-length period between your initial payment (if required) and recurring subscription payment.
+
+Set "delay" to be:
+- a number of days (i.e. 7 for 1 week trial)
+- a specific date (i.e. 2015-01-01)
+- a date calculated based on signup (i.e. Y2-01-01 or Y1-M2-01)
 
 == Installation ==
 
