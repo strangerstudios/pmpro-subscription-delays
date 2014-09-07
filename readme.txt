@@ -1,9 +1,9 @@
 === PMPro Subscription Delays ===
 Contributors: strangerstudios
 Tags: paid memberships pro, pmpro, memberships, ecommerce
-Requires at least: 3.0
-Tested up to: 3.5.1
-Stable tag: .3.2.1
+Requires at least: 3.5
+Tested up to: 4.0
+Stable tag: .3.2.2
 
 Adds a "delay" field to PMPro membership levels and discount codes, allowing you to set a variable-length period between your initial payment (if required) and recurring subscription payment.
 
@@ -24,6 +24,9 @@ Set "delay" to be:
 1. That's it. No settings.
 
 == Changelog ==
+= .3.2.2 =
+* Fixed grammar when costs are wrapped in <strong> tags. So "The price for membership is $2.00 per Month. after your 14 day trial." is now "The price for membership is $2.00 per Month after your 14 day trial.".
+
 = .3.2.1 =
 * Fixed a warning.
 
