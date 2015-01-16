@@ -119,6 +119,8 @@ function pmprosd_pmpro_profile_start_date($start_date, $order)
 		}
 	}
 		
+	$start_date = apply_filters( 'pmprosd_modify_start_date', $start_date );
+	
 	return $start_date;
 }
 add_filter("pmpro_profile_start_date", "pmprosd_pmpro_profile_start_date", 10, 2);
