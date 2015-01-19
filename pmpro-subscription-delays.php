@@ -81,7 +81,9 @@ add_action("pmpro_save_discount_code_level", "pmprosd_pmpro_save_discount_code_l
 
 //update subscription start date based on the discount code used or levels subscription start date
 function pmprosd_pmpro_profile_start_date($start_date, $order)
-{		
+{	
+	$subscription_delay = null;
+	
 	//if a discount code is used, we default to the setting there
 	if(!empty($order->discount_code))
 	{
@@ -119,6 +121,8 @@ function pmprosd_pmpro_profile_start_date($start_date, $order)
 		}
 	}
 		
+	apply_filters( 'pmprosd_modify_start_date', $start_date, $order, $subscription_delay );
+	
 	return $start_date;
 }
 add_filter("pmpro_profile_start_date", "pmprosd_pmpro_profile_start_date", 10, 2);
