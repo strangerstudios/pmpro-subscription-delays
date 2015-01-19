@@ -143,39 +143,6 @@ function pmprosd_daysUntilDate($date)
 		return floor($diff/60/60/24);
 }
 
-//treat levels like trials if they have start days
-function pmprosd_pmpro_subscribe_order($order, $gateway)
-{
-	if(!empty($order->discount_code))
-	{
-		global $wpdb;
-		
-		//get code id
-		$code_id = $wpdb->get_var("SELECT id FROM $wpdb->pmpro_discount_codes WHERE code = '" . esc_sql($order->discount_code) . "' LIMIT 1");				
-		if(!empty($code_id))
-		{
-			//we have a code
-			$delays = pmpro_getDCSDs($code_id);
-			if(!empty($delays[$order->membership_id]))
-			{
-				//we have a delay for this level, remove the trial (the subscription delay is our trial)				
-				//$order->TrialBillingCycles = 0;
-			}
-		}
-	}
-	else
-	{
-		$subscription_delay = get_option("pmpro_subscription_delay_" . $order->membership_id, "");
-		if(!empty($subscription_delay))
-		{
-			//$order->TrialBillingCycles = 0;
-		}
-	}
-
-	return $order;
-}
-add_filter("pmpro_subscribe_order", "pmprosd_pmpro_subscribe_order", 10, 2);
-
 /*
 	Add discount code and code id to the level object so we can use them later
 */
