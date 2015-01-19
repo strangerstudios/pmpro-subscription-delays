@@ -88,7 +88,7 @@ function pmprosd_pmpro_profile_start_date($start_date, $order)
 		global $wpdb;
 		
 		//get code id
-		$code_id = $wpdb->get_var("SELECT id FROM $wpdb->pmpro_discount_codes WHERE code = '" . $wpdb->escape($order->discount_code) . "' LIMIT 1");				
+		$code_id = $wpdb->get_var("SELECT id FROM $wpdb->pmpro_discount_codes WHERE code = '" . esc_sql($order->discount_code) . "' LIMIT 1");				
 		if(!empty($code_id))
 		{
 			//we have a code
@@ -147,7 +147,7 @@ function pmprosd_pmpro_subscribe_order($order, $gateway)
 		global $wpdb;
 		
 		//get code id
-		$code_id = $wpdb->get_var("SELECT id FROM $wpdb->pmpro_discount_codes WHERE code = '" . $wpdb->escape($order->discount_code) . "' LIMIT 1");				
+		$code_id = $wpdb->get_var("SELECT id FROM $wpdb->pmpro_discount_codes WHERE code = '" . esc_sql($order->discount_code) . "' LIMIT 1");				
 		if(!empty($code_id))
 		{
 			//we have a code
@@ -155,7 +155,7 @@ function pmprosd_pmpro_subscribe_order($order, $gateway)
 			if(!empty($delays[$order->membership_id]))
 			{
 				//we have a delay for this level, remove the trial (the subscription delay is our trial)				
-				$order->TrialBillingCycles = 0;
+				//$order->TrialBillingCycles = 0;
 			}
 		}
 	}
@@ -164,7 +164,7 @@ function pmprosd_pmpro_subscribe_order($order, $gateway)
 		$subscription_delay = get_option("pmpro_subscription_delay_" . $order->membership_id, "");
 		if(!empty($subscription_delay))
 		{
-			$order->TrialBillingCycles = 0;
+			//$order->TrialBillingCycles = 0;
 		}
 	}
 
