@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: PMPro Subscription Delays
+Plugin Name: Paid Memberships Pro - Subscription Delays Addon 
 Plugin URI: http://www.paidmembershipspro.com/wp/pmpro-subscription-delays/
 Description: Add a field to levels and discount codes to delay the start of a subscription by X days. (Add variable-length free trials to your levels.)
-Version: .3.2.2
+Version: .4
 Author: Stranger Studios
 Author URI: http://www.strangerstudios.com
 */
@@ -103,7 +103,7 @@ function pmprosd_pmpro_profile_start_date($start_date, $order)
 					$subscription_delay = $delays[$order->membership_id];
 				
 				//we have a delay for this level, set the start date to X days out
-				$start_date = date("Y-m-d", strtotime("+ " . intval($subscription_delay) . " Days")) . "T0:0:0";
+				$start_date = date("Y-m-d", strtotime("+ " . intval($subscription_delay) . " Days", current_time('timestamp'))) . "T0:0:0";
 			}
 		}
 	}
@@ -117,7 +117,7 @@ function pmprosd_pmpro_profile_start_date($start_date, $order)
 		
 		if(!empty($subscription_delay))
 		{
-			$start_date = date("Y-m-d", strtotime("+ " . intval($subscription_delay) . " Days")) . "T0:0:0";
+			$start_date = date("Y-m-d", strtotime("+ " . intval($subscription_delay) . " Days", current_time('timestamp'))) . "T0:0:0";
 		}
 	}
 		
@@ -127,6 +127,47 @@ function pmprosd_pmpro_profile_start_date($start_date, $order)
 }
 add_filter("pmpro_profile_start_date", "pmprosd_pmpro_profile_start_date", 10, 2);
 
+/**
+ * Save a "pmprosd_trialing_until" user meta after checkout.
+ *
+ * @since .4
+*/
+function pmprosd_pmpro_after_checkout($user_id)
+{
+	$level = pmpro_getMembershipLevelForUser($user_id);;
+	if(!empty($level))
+	{
+		$subscription_delay = get_option("pmpro_subscription_delay_" . $level->id, "");
+		if($subscription_delay)
+		{
+			$trialing_until = strtotime("+" . $subscription_delay . " Days", current_time('timestamp'));
+			update_user_meta($user_id, "pmprosd_trialing_until", $trialing_until);
+		}
+		else
+			delete_user_meta($user_id, "pmprosd_trialing_until");
+	}
+}
+add_action('pmpro_after_checkout', 'pmprosd_pmpro_after_checkout');
+
+/**
+ * Use the pmprosd_trialing_until value to calculate pmpro_next_payment when applicable
+ *
+ * @since .4
+*/
+function pmprosd_pmpro_next_payment($timestamp, $user_id, $order_status)
+{
+	//find the last order for this user
+	if(!empty($user_id) && !empty($timestamp))
+	{
+		$trialing_until = get_user_meta($user_id, "pmprosd_trialing_until", true);
+		if(!empty($trialing_until) && $trialing_until > current_time('timestamp'))
+			$timestamp = $trialing_until;
+	}
+				
+	return $timestamp;
+}
+add_filter('pmpro_next_payment', 'pmprosd_pmpro_next_payment', 10, 3);
+
 /*
 	Calculate how many days until a certain date (e.g. in YYYY-MM-DD format)
 	
@@ -134,8 +175,8 @@ add_filter("pmpro_profile_start_date", "pmprosd_pmpro_profile_start_date", 10, 2
 */
 function pmprosd_daysUntilDate($date)
 {
-	$datetime = strtotime($date);
-	$today = time();
+	$datetime = strtotime($date, current_time('timestamp'));
+	$today = current_time('timestamp');;
 	$diff = $datetime - $today;
 	if($diff < 0)
 		return 0;
@@ -203,3 +244,19 @@ function pmpro_getDCSDs($code_id)
 	else
 		return false;
 }
+
+/*
+Function to add links to the plugin row meta
+*/
+function pmprosd_plugin_row_meta($links, $file) {
+	if(strpos($file, 'pmpro-subscription-delays.php') !== false)
+	{
+		$new_links = array(
+			'<a href="' . esc_url('http://www.paidmembershipspro.com/add-ons/plugins-on-github/subscription-delays/')  . '" title="' . esc_attr( __( 'View Documentation', 'pmpro' ) ) . '">' . __( 'Docs', 'pmpro' ) . '</a>',
+			'<a href="' . esc_url('http://paidmembershipspro.com/support/') . '" title="' . esc_attr( __( 'Visit Customer Support Forum', 'pmpro' ) ) . '">' . __( 'Support', 'pmpro' ) . '</a>',
+		);
+		$links = array_merge($links, $new_links);
+	}
+	return $links;
+}
+add_filter('plugin_row_meta', 'pmprosd_plugin_row_meta', 10, 2);
