@@ -26,6 +26,7 @@ Set "delay" to be:
 == Changelog ==
 = .4.1 =
 * Fixed level cost text when specified dates are used. (Thanks, russell77)
+* BUG: Now correctly checking for and replacing "M", "Y", etc. in subscription delays.
 
 = .4 =
 * Using current_time('timestamp') to improve accuracy of dates and times generated.
