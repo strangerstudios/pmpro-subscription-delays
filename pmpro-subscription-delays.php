@@ -3,7 +3,7 @@
 Plugin Name: Paid Memberships Pro - Subscription Delays Addon 
 Plugin URI: http://www.paidmembershipspro.com/wp/pmpro-subscription-delays/
 Description: Add a field to levels and discount codes to delay the start of a subscription by X days. (Add variable-length free trials to your levels.)
-Version: .4
+Version: .4.1
 Author: Stranger Studios
 Author URI: http://www.strangerstudios.com
 */
@@ -211,10 +211,18 @@ function pmprosd_level_cost_text($cost, $level)
 		$subscription_delay = get_option("pmpro_subscription_delay_" . $level->id, "");
 	}
 	
+	$find = array("Year.", "Month.", "Week.", "Year</strong>.", "Month</strong>.", "Week</strong>.", "Years.", "Months.", "Weeks.", "Years</strong>.", "Months</strong>.", "Weeks</strong>.", "payments.", "payments</strong>.");
+	$replace = array("Year", "Month", "Week", "Year</strong>", "Month</strong>", "Week</strong>", "Years", "Months", "Weeks", "Years</strong>", "Months</strong>", "Weeks</strong>", "payments", "payments</strong>");
+
 	if(!empty($subscription_delay) && is_numeric($subscription_delay))
 	{
-		$cost = str_replace(array("Year.", "Month.", "Week.", "Year</strong>.", "Month</strong>.", "Week</strong>."), array("Year", "Month", "Week", "Year</strong>", "Month</strong>", "Week</strong>"), $cost);		
+		$cost = str_replace($find, $replace, $cost);
 		$cost .= " after your <strong>" . $subscription_delay . " day trial</strong>.";
+	}
+	elseif(!empty($subscription_delay))
+	{
+		$cost = str_replace($find, $replace, $cost);
+		$cost .= " starting " . date_i18n(get_option("date_format"), strtotime($subscription_delay, current_time("timestamp"))) . ".";
 	}
  
 	return $cost;
