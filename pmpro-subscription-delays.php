@@ -229,17 +229,22 @@ function pmprosd_level_cost_text($cost, $level)
 	$find = array("Year.", "Month.", "Week.", "Year</strong>.", "Month</strong>.", "Week</strong>.", "Years.", "Months.", "Weeks.", "Years</strong>.", "Months</strong>.", "Weeks</strong>.", "payments.", "payments</strong>.");
 	$replace = array("Year", "Month", "Week", "Year</strong>", "Month</strong>", "Week</strong>", "Years", "Months", "Weeks", "Years</strong>", "Months</strong>", "Weeks</strong>", "payments", "payments</strong>");
 
-	if(!empty($subscription_delay) && is_numeric($subscription_delay))
-	{
-		$cost = str_replace($find, $replace, $cost);
-		$cost .= " after your <strong>" . $subscription_delay . " day trial</strong>.";
-	}
-	elseif(!empty($subscription_delay))
-	{
-		$cost = str_replace($find, $replace, $cost);
-		$cost .= " starting " . date_i18n(get_option("date_format"), strtotime(pmprosd_daysUntilDate($subscription_delay) + 1 . "Days", current_time("timestamp"))) . ".";
-	}
- 
+	$custom_text = pmpro_getCustomLevelCostText($level->id);
+	
+        if ( empty($custom_text) )
+        {
+                if(!empty($subscription_delay) && is_numeric($subscription_delay))
+                {
+                        $cost = str_replace($find, $replace, $cost);
+                        $cost .= " after your <strong>" . $subscription_delay . " day trial</strong>.";
+                }
+                elseif(!empty($subscription_delay))
+                {
+                        $cost = str_replace($find, $replace, $cost);
+                        $cost .= " starting " . date_i18n(get_option("date_format"), strtotime($subscription_delay, current_time("timestamp"))) . ".";
+                }
+        }
+        
 	return $cost;
 }
 add_filter("pmpro_level_cost_text", "pmprosd_level_cost_text", 10, 2);
