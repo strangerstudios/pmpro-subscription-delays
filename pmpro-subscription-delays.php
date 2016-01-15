@@ -229,7 +229,11 @@ function pmprosd_level_cost_text($cost, $level)
 	$find = array("Year.", "Month.", "Week.", "Year</strong>.", "Month</strong>.", "Week</strong>.", "Years.", "Months.", "Weeks.", "Years</strong>.", "Months</strong>.", "Weeks</strong>.", "payments.", "payments</strong>.");
 	$replace = array("Year", "Month", "Week", "Year</strong>", "Month</strong>", "Week</strong>", "Years", "Months", "Weeks", "Years</strong>", "Months</strong>", "Weeks</strong>", "payments", "payments</strong>");
 
-	$custom_text = pmpro_getCustomLevelCostText($level->id);
+	if (function_exists('pmpro_getCustomLevelCostText')) {
+		$custom_text = pmpro_getCustomLevelCostText($level->id);
+	} else {
+		$custom_text = null;
+	}
 	
         if ( empty($custom_text) )
         {
