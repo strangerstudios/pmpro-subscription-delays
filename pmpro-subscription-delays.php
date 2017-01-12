@@ -111,7 +111,6 @@ function pmprosd_pmpro_profile_start_date($start_date, $order)
 	else
 		$start_date = date("Y-m-d", strtotime("+ " . intval($subscription_delay) . " Days", current_time('timestamp'))) . "T0:0:0";
 
-	fb($start_date, 'start date');
 	$start_date = apply_filters( 'pmprosd_modify_start_date', $start_date, $order, $subscription_delay );
 	return $start_date;
 }
@@ -266,6 +265,7 @@ function pmprosd_level_cost_text($cost, $level)
                 }
                 elseif(!empty($subscription_delay))
                 {
+	                    $subscription_delay = pmprosd_convert_date($subscription_delay);
                         $cost = str_replace($find, $replace, $cost);
                         $cost .= " starting " . date_i18n(get_option("date_format"), strtotime($subscription_delay, current_time("timestamp"))) . ".";
                 }
