@@ -97,32 +97,22 @@ function pmprosd_pmpro_profile_start_date($start_date, $order)
 			$delays = pmpro_getDCSDs($code_id);
 			if(!empty($delays[$order->membership_id]))
 			{
-				if(!is_numeric($delays[$order->membership_id]))		
-					$subscription_delay = pmprosd_daysUntilDate($delays[$order->membership_id]);
-				else
-					$subscription_delay = $delays[$order->membership_id];
-				
-				//we have a delay for this level, set the start date to X days out
-				$start_date = date("Y-m-d", strtotime("+ " . intval($subscription_delay) . " Days", current_time('timestamp'))) . "T0:0:0";
+				$subscription_delay = $delays[$order->membership_id];
 			}
 		}
 	}
 	else
 	{
-		//check the level for a subscription delay
 		$subscription_delay = get_option("pmpro_subscription_delay_" . $order->membership_id, "");
-		
-		if(!is_numeric($subscription_delay))		
-			$subscription_delay = pmprosd_daysUntilDate($subscription_delay);
-		
-		if(!empty($subscription_delay))
-		{
-			$start_date = date("Y-m-d", strtotime("+ " . intval($subscription_delay) . " Days", current_time('timestamp'))) . "T0:0:0";
-		}
 	}
-		
+
+	if(!is_numeric($subscription_delay))
+		$start_date = pmprosd_convert_date($subscription_delay);
+	else
+		$start_date = date("Y-m-d", strtotime("+ " . intval($subscription_delay) . " Days", current_time('timestamp'))) . "T0:0:0";
+
+	fb($start_date, 'start date');
 	$start_date = apply_filters( 'pmprosd_modify_start_date', $start_date, $order, $subscription_delay );
-	
 	return $start_date;
 }
 add_filter("pmpro_profile_start_date", "pmprosd_pmpro_profile_start_date", 10, 2);
@@ -140,7 +130,11 @@ function pmprosd_pmpro_after_checkout($user_id)
 		$subscription_delay = get_option("pmpro_subscription_delay_" . $level->id, "");
 		if($subscription_delay)
 		{
-			$trialing_until = strtotime("+" . $subscription_delay . " Days", current_time('timestamp'));
+			if(!is_numeric($subscription_delay))
+				$trialing_until = strtotime(pmprosd_convert_date($subscription_delay), current_time('timestamp'));
+			else
+				$trialing_until = strtotime("+" . $subscription_delay . " Days", current_time('timestamp'));
+
 			update_user_meta($user_id, "pmprosd_trialing_until", $trialing_until);
 		}
 		else
@@ -188,15 +182,43 @@ function pmprosd_daysUntilDate($date)
 	$replacements = array($Y . "-", $Y2 . "-", $M . "-", $M2 . "-");
 
 	$date = str_replace($searches, $replacements, $date);
-
 	$datetime = strtotime($date, current_time('timestamp'));
-
 	$today = current_time('timestamp');
 	$diff = $datetime - $today;
 	if($diff < 0)
 		return 0;
 	else
 		return floor($diff/60/60/24);
+}
+
+/**
+ * Convert dates to usable dates.
+ *
+ * @since 4.4
+ */
+function pmprosd_convert_date($date) {
+	//is this date already ok?
+	if(strtotime($date, current_time('timestamp')))
+		$new_date = $date;
+	else {
+		//replace vars
+		$Y = date("Y");
+		$Y2 = intval($Y) + 1;
+		$M = date("m");
+		if($M == 12)
+			$M2 = "01";
+		else
+			$M2 = str_pad(intval($M) + 1, 2, "0", STR_PAD_LEFT);
+
+		$searches = array("Y-", "Y2-", "M-", "M2-");
+		$replacements = array($Y . "-", $Y2 . "-", $M . "-", $M2 . "-");
+
+		$new_date = str_replace($searches, $replacements, $date);
+	}
+
+	$new_date .= 'T0:0:0';
+
+	return $new_date;
 }
 
 /*

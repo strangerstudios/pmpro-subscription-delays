@@ -24,6 +24,10 @@ Set "delay" to be:
 1. That's it. No settings.
 
 == Changelog ==
+= .4.4 =
+* BUG: Fixed issues when setting subscription delays as specific dates or dates calculated based on signup.
+* ENHANCEMENT: Added pmprosd_convert_date() function.
+
 = .4.3 =
 * BUG: Fixed issue with Authorize.net where the user would get an additional 1 period trial after the subscription delay. (Thanks, mobilizedcloud)
 * ENHANCEMENT: Added pmprosd_getDelay($level_id, $code_id) helper function.
