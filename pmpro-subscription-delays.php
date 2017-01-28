@@ -193,6 +193,7 @@ function pmprosd_daysUntilDate($date)
 
 	$today = current_time('timestamp');
 	$diff = $datetime - $today;
+
 	if($diff < 0)
 		return 0;
 	else
@@ -226,20 +227,56 @@ function pmprosd_level_cost_text($cost, $level)
 		$subscription_delay = get_option("pmpro_subscription_delay_" . $level->id, "");
 	}
 	
-	$find = array("Year.", "Month.", "Week.", "Year</strong>.", "Month</strong>.", "Week</strong>.", "Years.", "Months.", "Weeks.", "Years</strong>.", "Months</strong>.", "Weeks</strong>.", "payments.", "payments</strong>.");
-	$replace = array("Year", "Month", "Week", "Year</strong>", "Month</strong>", "Week</strong>", "Years", "Months", "Weeks", "Years</strong>", "Months</strong>", "Weeks</strong>", "payments", "payments</strong>");
+	$find = array(
+		__("Year.", "pmprosd"),
+		__("Month.", "pmprosd"),
+		__("Week.", "pmprosd"),
+		__("Year</strong>.", "pmprosd"),
+		__("Month</strong>.", "pmprosd"),
+		__("Week</strong>.", "pmprosd"),
+		__("Years.", "pmprosd"),
+		__("Months.", "pmprosd"),
+		__("Weeks.", "pmprosd"),
+		__("Years</strong>.", "pmprosd"),
+		__("Months</strong>.", "pmprosd"),
+		__("Weeks</strong>.", "pmprosd"),
+		__("payments.", "pmprosd"),
+		__("payments</strong>.", "pmprosd")
+	);
 
-	if(!empty($subscription_delay) && is_numeric($subscription_delay))
-	{
-		$cost = str_replace($find, $replace, $cost);
-		$cost .= " after your <strong>" . $subscription_delay . " day trial</strong>.";
+	$replace = array(
+		__("Year", "pmprosd"),
+		__("Month", "pmprosd"),
+		__("Week", "pmprosd"),
+		__("Year</strong>", "pmprosd"),
+		__("Month</strong>", "pmprosd"),
+		__("Week</strong>", "pmprosd"),
+		__("Years", "pmprosd"),
+		__("Months", "pmprosd"),
+		__("Weeks", "pmprosd"),
+		__("Years</strong>", "pmprosd"),
+		__("Months</strong>", "pmprosd"),
+		__("Weeks</strong>", "pmprosd"),
+		__("payments", "pmprosd"),
+		__("payments</strong>", "pmprosd")
+	);
+
+	if (function_exists('pmpro_getCustomLevelCostText')) {
+		$custom_text = pmpro_getCustomLevelCostText($level->id);
+	} else {
+		$custom_text = null;
 	}
-	elseif(!empty($subscription_delay))
-	{
-		$cost = str_replace($find, $replace, $cost);
-		$cost .= " starting " . date_i18n(get_option("date_format"), strtotime(pmprosd_daysUntilDate($subscription_delay) + 1 . "Days", current_time("timestamp"))) . ".";
+
+	if ( empty($custom_text) ) {
+		if ( ! empty( $subscription_delay ) && is_numeric( $subscription_delay ) ) {
+			$cost = str_replace( $find, $replace, $cost );
+			$cost .= sprintf( __( " after your <strong>%s day trial</strong>", "pmprosd" ), $subscription_delay );
+		} elseif ( ! empty( $subscription_delay ) ) {
+			$cost = str_replace( $find, $replace, $cost );
+			$cost .= sprintf( __( " starting %s.", "pmprosd" ), date_i18n( get_option( "date_format" ), strtotime( pmprosd_daysUntilDate( $subscription_delay ) + 1 . "Days", current_time( "timestamp" ) ) ) );
+		}
 	}
- 
+
 	return $cost;
 }
 add_filter("pmpro_level_cost_text", "pmprosd_level_cost_text", 10, 2);
@@ -267,6 +304,40 @@ function pmpro_getDCSDs($code_id)
 	else
 		return false;
 }
+
+/**
+ * Get the delay for a specific level/code combo
+ */
+function pmprosd_getDelay($level_id, $code_id = NULL) {
+	if(!empty($code_id)) {
+		$delays = pmpro_getDCSDs($code_id);
+		if(!empty($delays[$level_id]))
+			return $delays[$level_id];
+		else
+			return "";
+	} else {
+		$subscription_delay = get_option("pmpro_subscription_delay_" . $level_id, "");
+		return $subscription_delay;
+	}
+}
+
+/**
+ * With Authorize.net, we need to set the trialoccurences to 0
+ */
+function pmprosd_pmpro_subscribe_order($order, $gateway) {
+	if($order->gateway == "authorizenet") {
+		if(!empty($order->discount_code_id))
+			$subscription_delay = pmprosd_getDelay($order->membership_id, $order->discount_code_id);
+		else
+			$subscription_delay = pmprosd_getDelay($order->membership_id);
+
+		if(!empty($subscription_delay) && $order->TrialBillingCycles == 1)
+			$order->TrialBillingCycles = 0;
+	}
+
+	return $order;
+}
+add_filter('pmpro_subscribe_order', 'pmprosd_pmpro_subscribe_order', 10, 2);
 
 /*
 Function to add links to the plugin row meta
