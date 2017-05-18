@@ -13,20 +13,20 @@ function pmprosd_pmpro_membership_level_after_other_settings()
 {
 	$level_id = intval($_REQUEST['edit']);
 	$delay = get_option("pmpro_subscription_delay_" . $level_id, "");
-?>
-<table>
-<tbody class="form-table">
-	<tr>
-		<td>
-			<tr>
-				<th scope="row" valign="top"><label for="subscription_delay">Subscription Delay:</label></th>
-				<td><input name="subscription_delay" type="text" size="20" value="<?php echo esc_attr($delay);?>" /> <small># of days to delay the start of the subscription. If set, this will override any trial/etc defined above.</small></td>
-			</tr>
-		</td>
-	</tr> 
-</tbody>
-</table>
-<?php
+	?>
+    <table>
+        <tbody class="form-table">
+        <tr>
+            <td>
+        <tr>
+            <th scope="row" valign="top"><label for="subscription_delay">Subscription Delay:</label></th>
+            <td><input name="subscription_delay" type="text" size="20" value="<?php echo esc_attr($delay);?>" /> <small># of days to delay the start of the subscription. If set, this will override any trial/etc defined above.</small></td>
+        </tr>
+        </td>
+        </tr>
+        </tbody>
+    </table>
+	<?php
 }
 add_action("pmpro_membership_level_after_other_settings", "pmprosd_pmpro_membership_level_after_other_settings");
 
@@ -46,20 +46,20 @@ function pmprosd_pmpro_discount_code_after_level_settings($code_id, $level)
 		$delay = $delays[$level->id];
 	else
 		$delay = "";
-?>
-<table>
-<tbody class="form-table">
-	<tr>
-		<td>
-			<tr>
-				<th scope="row" valign="top"><label for="subscription_delay">Subscription Delay:</label></th>
-				<td><input name="subscription_delay[]" type="text" size="20" value="<?php echo esc_attr($delay);?>" /> <small># of days to delay the start of the subscription. If set, this will override any trial/etc defined above.</small></td>
-			</tr>
-		</td>
-	</tr> 
-</tbody>
-</table>
-<?php
+	?>
+    <table>
+        <tbody class="form-table">
+        <tr>
+            <td>
+        <tr>
+            <th scope="row" valign="top"><label for="subscription_delay">Subscription Delay:</label></th>
+            <td><input name="subscription_delay[]" type="text" size="20" value="<?php echo esc_attr($delay);?>" /> <small># of days to delay the start of the subscription. If set, this will override any trial/etc defined above.</small></td>
+        </tr>
+        </td>
+        </tr>
+        </tbody>
+    </table>
+	<?php
 }
 add_action("pmpro_discount_code_after_level_settings", "pmprosd_pmpro_discount_code_after_level_settings", 10, 2);
 
@@ -70,18 +70,18 @@ function pmprosd_pmpro_save_discount_code_level($code_id, $level_id)
 	$subscription_delay_a = $_REQUEST['subscription_delay'];	//subscription delays for levels checked
 	
 	if(!empty($all_levels_a))
-	{	
-		$key = array_search($level_id, $all_levels_a);				//which level is it in the list?		
-		$delays = pmpro_getDCSDs($code_id);						//get delays for this code		
-		$delays[$level_id] = $subscription_delay_a[$key];			//add delay for this level		
-		pmpro_saveDCSDs($code_id, $delays);						//save delays		
-	}	
+	{
+		$key = array_search($level_id, $all_levels_a);				//which level is it in the list?
+		$delays = pmpro_getDCSDs($code_id);						//get delays for this code
+		$delays[$level_id] = $subscription_delay_a[$key];			//add delay for this level
+		pmpro_saveDCSDs($code_id, $delays);						//save delays
+	}
 }
 add_action("pmpro_save_discount_code_level", "pmprosd_pmpro_save_discount_code_level", 10, 2);
 
 //update subscription start date based on the discount code used or levels subscription start date
 function pmprosd_pmpro_profile_start_date($start_date, $order)
-{	
+{
 	$subscription_delay = null;
 	
 	//if a discount code is used, we default to the setting there
@@ -90,39 +90,28 @@ function pmprosd_pmpro_profile_start_date($start_date, $order)
 		global $wpdb;
 		
 		//get code id
-		$code_id = $wpdb->get_var("SELECT id FROM $wpdb->pmpro_discount_codes WHERE code = '" . esc_sql($order->discount_code) . "' LIMIT 1");				
+		$code_id = $wpdb->get_var("SELECT id FROM $wpdb->pmpro_discount_codes WHERE code = '" . esc_sql($order->discount_code) . "' LIMIT 1");
 		if(!empty($code_id))
 		{
 			//we have a code
 			$delays = pmpro_getDCSDs($code_id);
 			if(!empty($delays[$order->membership_id]))
 			{
-				if(!is_numeric($delays[$order->membership_id]))		
-					$subscription_delay = pmprosd_daysUntilDate($delays[$order->membership_id]);
-				else
-					$subscription_delay = $delays[$order->membership_id];
-				
-				//we have a delay for this level, set the start date to X days out
-				$start_date = date("Y-m-d", strtotime("+ " . intval($subscription_delay) . " Days", current_time('timestamp'))) . "T0:0:0";
+				$subscription_delay = $delays[$order->membership_id];
 			}
 		}
 	}
 	else
 	{
-		//check the level for a subscription delay
 		$subscription_delay = get_option("pmpro_subscription_delay_" . $order->membership_id, "");
-		
-		if(!is_numeric($subscription_delay))		
-			$subscription_delay = pmprosd_daysUntilDate($subscription_delay);
-		
-		if(!empty($subscription_delay))
-		{
-			$start_date = date("Y-m-d", strtotime("+ " . intval($subscription_delay) . " Days", current_time('timestamp'))) . "T0:0:0";
-		}
 	}
-		
-	$start_date = apply_filters( 'pmprosd_modify_start_date', $start_date, $order, $subscription_delay );
 	
+	if(!is_numeric($subscription_delay))
+		$start_date = pmprosd_convert_date($subscription_delay);
+	else
+		$start_date = date("Y-m-d", strtotime("+ " . intval($subscription_delay) . " Days", current_time('timestamp'))) . "T0:0:0";
+	
+	$start_date = apply_filters( 'pmprosd_modify_start_date', $start_date, $order, $subscription_delay );
 	return $start_date;
 }
 add_filter("pmpro_profile_start_date", "pmprosd_pmpro_profile_start_date", 10, 2);
@@ -131,7 +120,7 @@ add_filter("pmpro_profile_start_date", "pmprosd_pmpro_profile_start_date", 10, 2
  * Save a "pmprosd_trialing_until" user meta after checkout.
  *
  * @since .4
-*/
+ */
 function pmprosd_pmpro_after_checkout($user_id)
 {
 	$level = pmpro_getMembershipLevelForUser($user_id);;
@@ -140,7 +129,11 @@ function pmprosd_pmpro_after_checkout($user_id)
 		$subscription_delay = get_option("pmpro_subscription_delay_" . $level->id, "");
 		if($subscription_delay)
 		{
-			$trialing_until = strtotime("+" . $subscription_delay . " Days", current_time('timestamp'));
+			if(!is_numeric($subscription_delay))
+				$trialing_until = strtotime(pmprosd_convert_date($subscription_delay), current_time('timestamp'));
+			else
+				$trialing_until = strtotime("+" . $subscription_delay . " Days", current_time('timestamp'));
+			
 			update_user_meta($user_id, "pmprosd_trialing_until", $trialing_until);
 		}
 		else
@@ -153,7 +146,7 @@ add_action('pmpro_after_checkout', 'pmprosd_pmpro_after_checkout');
  * Use the pmprosd_trialing_until value to calculate pmpro_next_payment when applicable
  *
  * @since .4
-*/
+ */
 function pmprosd_pmpro_next_payment($timestamp, $user_id, $order_status)
 {
 	//find the last order for this user
@@ -163,7 +156,7 @@ function pmprosd_pmpro_next_payment($timestamp, $user_id, $order_status)
 		if(!empty($trialing_until) && $trialing_until > current_time('timestamp'))
 			$timestamp = $trialing_until;
 	}
-				
+	
 	return $timestamp;
 }
 add_filter('pmpro_next_payment', 'pmprosd_pmpro_next_payment', 10, 3);
@@ -183,21 +176,51 @@ function pmprosd_daysUntilDate($date)
 		$M2 = "01";
 	else
 		$M2 = str_pad(intval($M) + 1, 2, "0", STR_PAD_LEFT);
-
+	
 	$searches = array("Y-", "Y2-", "M-", "M2-");
 	$replacements = array($Y . "-", $Y2 . "-", $M . "-", $M2 . "-");
-
+	
 	$date = str_replace($searches, $replacements, $date);
-
 	$datetime = strtotime($date, current_time('timestamp'));
-
 	$today = current_time('timestamp');
 	$diff = $datetime - $today;
-
 	if($diff < 0)
 		return 0;
 	else
 		return floor($diff/60/60/24);
+}
+
+/**
+ * Convert dates to usable dates.
+ *
+ * @since 4.4
+ */
+function pmprosd_convert_date($date) {
+	
+    error_log("Received: {$date}");
+    
+    //is this date already ok?
+	if(strtotime($date, current_time('timestamp')))
+		$new_date = $date;
+	else {
+		//replace vars
+		$Y = $Y1 = date("Y");
+		$Y2 = intval($Y) + 1;
+		$M = $M1 = date("m");
+		if($M == 12 )
+			$M2 = "01";
+		else
+			$M2 = str_pad(intval($M) + 1, 2, "0", STR_PAD_LEFT);
+		
+		$searches = array("Y-", "Y1-", "Y2-", "M-", "M1-", "M2-");
+		$replacements = array($Y . "-", $Y1 . "-", $Y2 . "-", $M . "-", $M1 . "-", $M2 . "-");
+		
+		$new_date = str_replace($searches, $replacements, $date);
+	}
+	
+	$new_date .= 'T0:0:0';
+	
+	return $new_date;
 }
 
 /*
@@ -227,56 +250,31 @@ function pmprosd_level_cost_text($cost, $level)
 		$subscription_delay = get_option("pmpro_subscription_delay_" . $level->id, "");
 	}
 	
-	$find = array(
-		__("Year.", "pmprosd"),
-		__("Month.", "pmprosd"),
-		__("Week.", "pmprosd"),
-		__("Year</strong>.", "pmprosd"),
-		__("Month</strong>.", "pmprosd"),
-		__("Week</strong>.", "pmprosd"),
-		__("Years.", "pmprosd"),
-		__("Months.", "pmprosd"),
-		__("Weeks.", "pmprosd"),
-		__("Years</strong>.", "pmprosd"),
-		__("Months</strong>.", "pmprosd"),
-		__("Weeks</strong>.", "pmprosd"),
-		__("payments.", "pmprosd"),
-		__("payments</strong>.", "pmprosd")
-	);
-
-	$replace = array(
-		__("Year", "pmprosd"),
-		__("Month", "pmprosd"),
-		__("Week", "pmprosd"),
-		__("Year</strong>", "pmprosd"),
-		__("Month</strong>", "pmprosd"),
-		__("Week</strong>", "pmprosd"),
-		__("Years", "pmprosd"),
-		__("Months", "pmprosd"),
-		__("Weeks", "pmprosd"),
-		__("Years</strong>", "pmprosd"),
-		__("Months</strong>", "pmprosd"),
-		__("Weeks</strong>", "pmprosd"),
-		__("payments", "pmprosd"),
-		__("payments</strong>", "pmprosd")
-	);
-
+	$find = array("Year.", "Month.", "Week.", "Year</strong>.", "Month</strong>.", "Week</strong>.", "Years.", "Months.", "Weeks.", "Years</strong>.", "Months</strong>.", "Weeks</strong>.", "payments.", "payments</strong>.");
+	$replace = array("Year", "Month", "Week", "Year</strong>", "Month</strong>", "Week</strong>", "Years", "Months", "Weeks", "Years</strong>", "Months</strong>", "Weeks</strong>", "payments", "payments</strong>");
+	
 	if (function_exists('pmpro_getCustomLevelCostText')) {
 		$custom_text = pmpro_getCustomLevelCostText($level->id);
 	} else {
 		$custom_text = null;
 	}
-
-	if ( empty($custom_text) ) {
-		if ( ! empty( $subscription_delay ) && is_numeric( $subscription_delay ) ) {
-			$cost = str_replace( $find, $replace, $cost );
-			$cost .= sprintf( __( " after your <strong>%s day trial</strong>", "pmprosd" ), $subscription_delay );
-		} elseif ( ! empty( $subscription_delay ) ) {
-			$cost = str_replace( $find, $replace, $cost );
-			$cost .= sprintf( __( " starting %s.", "pmprosd" ), date_i18n( get_option( "date_format" ), strtotime( pmprosd_daysUntilDate( $subscription_delay ) + 1 . "Days", current_time( "timestamp" ) ) ) );
+	
+	if ( empty($custom_text) )
+	{
+		if(!empty($subscription_delay) && is_numeric($subscription_delay))
+		{
+			$cost = str_replace($find, $replace, $cost);
+			$cost .= " after your <strong>" . $subscription_delay . " day trial</strong>.";
+		}
+        elseif(!empty($subscription_delay))
+		{
+			$subscription_delay = pmprosd_convert_date($subscription_delay);
+			error_log("Custom Delay value: {$subscription_delay}");
+			$cost = str_replace($find, $replace, $cost);
+			$cost .= " starting " . date_i18n(get_option("date_format"), strtotime($subscription_delay, current_time("timestamp"))) . ".";
 		}
 	}
-
+	
 	return $cost;
 }
 add_filter("pmpro_level_cost_text", "pmprosd_level_cost_text", 10, 2);
@@ -287,8 +285,8 @@ add_filter("pmpro_level_cost_text", "pmprosd_level_cost_text", 10, 2);
 	This function will save an array of delays (level_id => days) into an option storing delays for all code.
 */
 function pmpro_saveDCSDs($code_id, $delays)
-{	
-	$all_delays = get_option("pmpro_discount_code_subscription_delays", array());		
+{
+	$all_delays = get_option("pmpro_discount_code_subscription_delays", array());
 	$all_delays[$code_id] = $delays;
 	update_option("pmpro_discount_code_subscription_delays", $all_delays);
 }
@@ -298,7 +296,7 @@ function pmpro_saveDCSDs($code_id, $delays)
 */
 function pmpro_getDCSDs($code_id)
 {
-	$all_delays = get_option("pmpro_discount_code_subscription_delays", array());		
+	$all_delays = get_option("pmpro_discount_code_subscription_delays", array());
 	if(!empty($all_delays) && !empty($all_delays[$code_id]))
 		return $all_delays[$code_id];
 	else
@@ -330,11 +328,11 @@ function pmprosd_pmpro_subscribe_order($order, $gateway) {
 			$subscription_delay = pmprosd_getDelay($order->membership_id, $order->discount_code_id);
 		else
 			$subscription_delay = pmprosd_getDelay($order->membership_id);
-
+		
 		if(!empty($subscription_delay) && $order->TrialBillingCycles == 1)
 			$order->TrialBillingCycles = 0;
 	}
-
+	
 	return $order;
 }
 add_filter('pmpro_subscribe_order', 'pmprosd_pmpro_subscribe_order', 10, 2);
