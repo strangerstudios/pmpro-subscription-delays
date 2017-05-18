@@ -3,7 +3,7 @@
 Plugin Name: Paid Memberships Pro - Subscription Delays Addon 
 Plugin URI: http://www.paidmembershipspro.com/wp/pmpro-subscription-delays/
 Description: Add a field to levels and discount codes to delay the start of a subscription by X days. (Add variable-length free trials to your levels.)
-Version: .4.2
+Version: .4.3
 Author: Stranger Studios
 Author URI: http://www.strangerstudios.com
 */
