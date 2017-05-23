@@ -169,16 +169,16 @@ add_filter('pmpro_next_payment', 'pmprosd_pmpro_next_payment', 10, 3);
 function pmprosd_daysUntilDate($date)
 {
 	//replace vars
-	$Y = date("Y");
+	$Y = $Y1 = date("Y");
 	$Y2 = intval($Y) + 1;
-	$M = date("m");
+	$M = $M1 = date("m");
 	if($M == 12)
 		$M2 = "01";
 	else
 		$M2 = str_pad(intval($M) + 1, 2, "0", STR_PAD_LEFT);
 	
-	$searches = array("Y-", "Y2-", "M-", "M2-");
-	$replacements = array($Y . "-", $Y2 . "-", $M . "-", $M2 . "-");
+	$searches = array("Y-", "Y1-", "Y2-", "M-", "M1-", "M2-");
+	$replacements = array($Y . "-", $Y1 . "-", $Y2 . "-", $M . "-", $M1 . "-", $M2 . "-");
 	
 	$date = str_replace($searches, $replacements, $date);
 	$datetime = strtotime($date, current_time('timestamp'));
