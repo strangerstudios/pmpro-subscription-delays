@@ -196,7 +196,7 @@ function pmprosd_daysUntilDate($date)
 	if($diff < 0)
 		return 0;
 	else
-		return floor($diff/60/60/24);
+		return ceil($diff/60/60/24);
 }
 
 /*
@@ -244,7 +244,7 @@ function pmprosd_level_cost_text($cost, $level)
                 }
                 elseif(!empty($subscription_delay))
                 {
-                    $delay = ( ( pmprosd_daysUntilDate( $subscription_delay ) + 1 ) * DAY_IN_SECONDS ) + current_time( 'timestamp');
+                    $delay = ( pmprosd_daysUntilDate( $subscription_delay ) * DAY_IN_SECONDS ) + current_time( 'timestamp');
                     
                         $cost = str_replace($find, $replace, $cost);
                         $cost .= " starting " . date_i18n(get_option("date_format"), $delay ) . ".";
