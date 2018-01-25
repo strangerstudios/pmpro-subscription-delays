@@ -1,4 +1,4 @@
-=== Paid Memberships Pro - Subscription Delays Addon ===
+=== Paid Memberships Pro - Subscription Delays Add On ===
 Contributors: strangerstudios
 Tags: paid memberships pro, pmpro, memberships, ecommerce
 Requires at least: 3.5
