@@ -1,11 +1,11 @@
 <?php
 /*
-Plugin Name: Paid Memberships Pro - Subscription Delays Addon 
-Plugin URI: http://www.paidmembershipspro.com/wp/pmpro-subscription-delays/
-Description: Add a field to levels and discount codes to delay the start of a subscription by X days. (Add variable-length free trials to your levels.)
+Plugin Name: Paid Memberships Pro - Subscription Delays Add On 
+Plugin URI: https://www.paidmembershipspro.com/add-ons/subscription-delays/
+Description: Adds a field to delay the start of a subscription for membership levels and discount codes for variable-length trials.
 Version: .4.4
-Author: Stranger Studios
-Author URI: http://www.strangerstudios.com
+Author: Paid Memberships Pro
+Author URI: https://www.paidmembershipspro.com
 */
 
 //add subscription delay field to level price settings
@@ -321,8 +321,8 @@ function pmprosd_plugin_row_meta($links, $file) {
 	if(strpos($file, 'pmpro-subscription-delays.php') !== false)
 	{
 		$new_links = array(
-			'<a href="' . esc_url('http://www.paidmembershipspro.com/add-ons/plugins-on-github/subscription-delays/')  . '" title="' . esc_attr( __( 'View Documentation', 'pmpro' ) ) . '">' . __( 'Docs', 'pmpro' ) . '</a>',
-			'<a href="' . esc_url('http://paidmembershipspro.com/support/') . '" title="' . esc_attr( __( 'Visit Customer Support Forum', 'pmpro' ) ) . '">' . __( 'Support', 'pmpro' ) . '</a>',
+			'<a href="' . esc_url('https://www.paidmembershipspro.com/add-ons/subscription-delays/')  . '" title="' . esc_attr( __( 'View Documentation', 'pmpro' ) ) . '">' . __( 'Docs', 'pmpro' ) . '</a>',
+			'<a href="' . esc_url('https://paidmembershipspro.com/support/') . '" title="' . esc_attr( __( 'Visit Customer Support Forum', 'pmpro' ) ) . '">' . __( 'Support', 'pmpro' ) . '</a>',
 		);
 		$links = array_merge($links, $new_links);
 	}
