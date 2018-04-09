@@ -195,10 +195,7 @@ function pmprosd_daysUntilDate($date)
  *
  * @since 4.4
  */
-function pmprosd_convert_date($date) {
-	
-    error_log("Received: {$date}");
-    
+function pmprosd_convert_date($date) {    
     //is this date already ok?
 	if(strtotime($date, current_time('timestamp')))
 		$new_date = $date;
@@ -268,8 +265,7 @@ function pmprosd_level_cost_text($cost, $level)
 		}
         elseif(!empty($subscription_delay))
 		{
-			$subscription_delay = pmprosd_convert_date($subscription_delay);
-			error_log("Custom Delay value: {$subscription_delay}");
+			$subscription_delay = pmprosd_convert_date($subscription_delay);			
 			$cost = str_replace($find, $replace, $cost);
 			$cost .= " starting " . date_i18n(get_option("date_format"), strtotime($subscription_delay, current_time("timestamp"))) . ".";
 		}
