@@ -1,11 +1,11 @@
 <?php
 /*
-Plugin Name: Paid Memberships Pro - Subscription Delays Addon 
-Plugin URI: http://www.paidmembershipspro.com/wp/pmpro-subscription-delays/
-Description: Add a field to levels and discount codes to delay the start of a subscription by X days. (Add variable-length free trials to your levels.)
-Version: .4.3
-Author: Stranger Studios
-Author URI: http://www.strangerstudios.com
+Plugin Name: Paid Memberships Pro - Subscription Delays Add On 
+Plugin URI: https://www.paidmembershipspro.com/add-ons/subscription-delays/
+Description: Adds a field to delay the start of a subscription for membership levels and discount codes for variable-length trials.
+Version: .4.4
+Author: Paid Memberships Pro
+Author URI: https://www.paidmembershipspro.com
 */
 
 //add subscription delay field to level price settings
@@ -176,8 +176,8 @@ function pmprosd_daysUntilDate($date)
 		$M2 = "01";
 	else
 		$M2 = str_pad(intval($M) + 1, 2, "0", STR_PAD_LEFT);
-	
-	$searches = array("Y-", "Y1-", "Y2-", "M-", "M1-", "M2-");
+
+  $searches = array("Y-", "Y1-", "Y2-", "M-", "M1-", "M2-");
 	$replacements = array($Y . "-", $Y1 . "-", $Y2 . "-", $M . "-", $M1 . "-", $M2 . "-");
 	
 	$date = str_replace($searches, $replacements, $date);
@@ -187,7 +187,7 @@ function pmprosd_daysUntilDate($date)
 	if($diff < 0)
 		return 0;
 	else
-		return floor($diff/60/60/24);
+		return ceil($diff/60/60/24);
 }
 
 /**
@@ -274,7 +274,7 @@ function pmprosd_level_cost_text($cost, $level)
 			$cost .= " starting " . date_i18n(get_option("date_format"), strtotime($subscription_delay, current_time("timestamp"))) . ".";
 		}
 	}
-	
+  
 	return $cost;
 }
 add_filter("pmpro_level_cost_text", "pmprosd_level_cost_text", 10, 2);
@@ -324,10 +324,13 @@ function pmprosd_getDelay($level_id, $code_id = NULL) {
  */
 function pmprosd_pmpro_subscribe_order($order, $gateway) {
 	if($order->gateway == "authorizenet") {
-		if(!empty($order->discount_code_id))
-			$subscription_delay = pmprosd_getDelay($order->membership_id, $order->discount_code_id);
-		else
+		if(!empty($order->discount_code)) {
+			global $wpdb;
+			$code_id = $wpdb->get_var("SELECT id FROM $wpdb->pmpro_discount_codes WHERE code = '" . esc_sql($order->discount_code) . "' LIMIT 1");
+			$subscription_delay = pmprosd_getDelay($order->membership_id, $code_id);
+		} else {
 			$subscription_delay = pmprosd_getDelay($order->membership_id);
+		}
 		
 		if(!empty($subscription_delay) && $order->TrialBillingCycles == 1)
 			$order->TrialBillingCycles = 0;
@@ -344,8 +347,8 @@ function pmprosd_plugin_row_meta($links, $file) {
 	if(strpos($file, 'pmpro-subscription-delays.php') !== false)
 	{
 		$new_links = array(
-			'<a href="' . esc_url('http://www.paidmembershipspro.com/add-ons/plugins-on-github/subscription-delays/')  . '" title="' . esc_attr( __( 'View Documentation', 'pmpro' ) ) . '">' . __( 'Docs', 'pmpro' ) . '</a>',
-			'<a href="' . esc_url('http://paidmembershipspro.com/support/') . '" title="' . esc_attr( __( 'Visit Customer Support Forum', 'pmpro' ) ) . '">' . __( 'Support', 'pmpro' ) . '</a>',
+			'<a href="' . esc_url('https://www.paidmembershipspro.com/add-ons/subscription-delays/')  . '" title="' . esc_attr( __( 'View Documentation', 'pmpro' ) ) . '">' . __( 'Docs', 'pmpro' ) . '</a>',
+			'<a href="' . esc_url('https://paidmembershipspro.com/support/') . '" title="' . esc_attr( __( 'Visit Customer Support Forum', 'pmpro' ) ) . '">' . __( 'Support', 'pmpro' ) . '</a>',
 		);
 		$links = array_merge($links, $new_links);
 	}

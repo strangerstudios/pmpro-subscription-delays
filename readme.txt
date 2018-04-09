@@ -1,8 +1,8 @@
-=== Paid Memberships Pro - Subscription Delays Addon ===
+=== Paid Memberships Pro - Subscription Delays Add On ===
 Contributors: strangerstudios
 Tags: paid memberships pro, pmpro, memberships, ecommerce
 Requires at least: 3.5
-Tested up to: 4.7.5
+Tested up to: 4.9.1
 Stable tag: .4.4
 
 Adds a "delay" field to PMPro membership levels and discount codes, allowing you to set a variable-length period between your initial payment (if required) and recurring subscription payment.
@@ -24,8 +24,11 @@ Set "delay" to be:
 1. That's it. No settings.
 
 == Changelog ==
-= .4.4 =
+= .4.5 =
 * BUG: Didn't handle the documented M/Y variables (M1 & Y1)
+
+= .4.4 =
+* BUG: The 1 period free trial bug was still happening in some cases with discount codes with delays set on them.
 
 = .4.3 =
 * BUG: Fixed issue with Authorize.net where the user would get an additional 1 period trial after the subscription delay. (Thanks, mobilizedcloud)
