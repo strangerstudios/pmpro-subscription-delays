@@ -24,6 +24,9 @@ Set "delay" to be:
 1. That's it. No settings.
 
 == Changelog ==
+= .4.5 =
+* BUG: Didn't handle the documented M/Y variables (M1 & Y1)
+
 = .4.4 =
 * BUG: The 1 period free trial bug was still happening in some cases with discount codes with delays set on them.
 
