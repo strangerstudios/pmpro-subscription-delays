@@ -187,7 +187,7 @@ function pmprosd_daysUntilDate( $date ) {
  */
 function pmprosd_convert_date( $date ) {
 	// is this date already ok?
-	if ( strtotime( $date, current_time( 'timestamp' ) ) ) {
+	if ( strpos( $date, 'Y' ) === false && strpos( $date, 'M' ) === false ) {
 		$new_date = $date;
 	} else {
 		// replace vars
