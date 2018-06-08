@@ -100,9 +100,9 @@ function pmprosd_pmpro_profile_start_date( $start_date, $order ) {
 	    return $start_date;
     }
     
-	if ( !empty( $subscription_delay ) && ! is_numeric( $subscription_delay ) ) {
+	if ( ! is_numeric( $subscription_delay ) ) {
 		$start_date = pmprosd_convert_date( $subscription_delay );
-	} else if ( !empty( $subscription_delay ) ) {
+	} else {
 		$start_date = date( 'Y-m-d', strtotime( '+ ' . intval( $subscription_delay ) . ' Days', current_time( 'timestamp' ) ) ) . 'T0:0:0';
 	}
 
