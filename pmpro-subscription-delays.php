@@ -3,7 +3,7 @@
 Plugin Name: Paid Memberships Pro - Subscription Delays Add On
 Plugin URI: https://www.paidmembershipspro.com/add-ons/subscription-delays/
 Description: Adds a field to delay the start of a subscription for membership levels and discount codes for variable-length trials.
-Version: .4.6
+Version: .5
 Author: Paid Memberships Pro
 Author URI: https://www.paidmembershipspro.com
 */
@@ -158,6 +158,9 @@ add_filter( 'pmpro_next_payment', 'pmprosd_pmpro_next_payment', 10, 3 );
 	Calculate how many days until a certain date (e.g. in YYYY-MM-DD format)
 
 	Some logic taken from: http://stackoverflow.com/a/654378/1154321
+	
+	NOTE: Doesn't seem like we are using this anymore, but leaving it in
+	as is in case custom code was using it.
 */
 function pmprosd_daysUntilDate( $date ) {
 	// replace vars
@@ -190,16 +193,27 @@ function pmprosd_daysUntilDate( $date ) {
  * @since 4.4
  */
 function pmprosd_convert_date( $date ) {
+	//vars to tell us which placeholders are being used
+    $has_M = ( strpos( strtoupper( $date ), "M" ) !== false );
+    $has_Y = ( strpos( strtoupper( $date ), "Y") !== false);
+	
 	// is this date already ok?
-	if ( strpos( $date, 'Y' ) === false && strpos( $date, 'M' ) === false ) {
+	if ( ! $has_M && ! $has_Y ) {
 		$new_date = $date;
 	} else {
 		// replace vars
-		$Y  = $Y1 = date( 'Y' );
+		$Y  = $Y1 = date( 'Y', current_time( 'timestamp' ) );
 		$Y2 = intval( $Y ) + 1;
 		$M  = $M1 = date( 'm' );
 		if ( $M == 12 ) {
-			$M2 = '01';
+			//set to Jan
+	        $M2 = "01";
+	
+	        //set this year to next
+	        if ($has_Y) {
+	            $Y = $Y2;
+				$Y1 = $Y2;
+	        }
 		} else {
 			$M2 = str_pad( intval( $M ) + 1, 2, '0', STR_PAD_LEFT );
 		}
@@ -210,7 +224,8 @@ function pmprosd_convert_date( $date ) {
 		$new_date = str_replace( $searches, $replacements, $date );
 	}
 	
-    if ( empty( $new_date ) ) {
+    // Add time
+	if ( strpos( $new_date, ':') !== false ) {
 	    $new_date = $date;
     } else {
 	    $new_date .= 'T0:0:0';
