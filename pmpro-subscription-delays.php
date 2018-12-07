@@ -204,7 +204,7 @@ function pmprosd_convert_date( $date ) {
 		// replace vars
 		$Y  = $Y1 = date( 'Y', current_time( 'timestamp' ) );
 		$Y2 = intval( $Y ) + 1;
-		$M  = $M1 = date( 'm' );
+		$M  = $M1 = date( 'm', current_time( 'timestamp' ) );
 		if ( $M == 12 ) {
 			//set to Jan
 	        $M2 = "01";
