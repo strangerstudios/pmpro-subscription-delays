@@ -3,7 +3,7 @@
 Plugin Name: Paid Memberships Pro - Subscription Delays Add On
 Plugin URI: https://www.paidmembershipspro.com/add-ons/subscription-delays/
 Description: Adds a field to delay the start of a subscription for membership levels and discount codes for variable-length trials.
-Version: .5
+Version: .5.1
 Author: Paid Memberships Pro
 Author URI: https://www.paidmembershipspro.com
 */
@@ -163,23 +163,61 @@ add_filter( 'pmpro_next_payment', 'pmprosd_pmpro_next_payment', 10, 3 );
 	as is in case custom code was using it.
 */
 function pmprosd_daysUntilDate( $date ) {
-	// replace vars
-	$Y  = $Y1 = date( 'Y' );
-	$Y2 = intval( $Y ) + 1;
-	$M  = $M1 = date( 'm' );
+	$date = strtoupper( $date );
+	
+	//vars to tell us which placeholders are being used
+    $has_M = (strpos($date, "M") !== false);
+    $has_Y = (strpos($date, "Y") !== false);
+	
+	$now = current_time( 'timestamp' );
+    $Y = $Y1 = date("Y", $now );
+    $Y2 = intval($Y) + 1;
+    $M = $M1 = date("m", $now );
+    $D = $D1 = date("j", $now );
+	
+	$date_parts = explode( '-', $date );
+    $day_part = (int)$date_parts[count($date_parts) - 1];
+	$month_part = (int)$date_parts[count($date_parts) - 2];
+	
 	if ( $M == 12 ) {
 		$M2 = '01';
+		
+		//set this year to next
+        if ( $has_Y && $day_part <= (int)$D && ( $has_M || $month_part != '12' ) ) {
+            $M = $M1 = "01";
+            $Y = $Y2;
+            $Y1 = $Y2;
+        }
 	} else {
-		$M2 = str_pad( intval( $M ) + 1, 2, '0', STR_PAD_LEFT );
+		$M2 = str_pad(intval($M) + 1, 2, "0", STR_PAD_LEFT);
 	}
 
 	$searches     = array( 'Y-', 'Y1-', 'Y2-', 'M-', 'M1-', 'M2-' );
 	$replacements = array( $Y . '-', $Y1 . '-', $Y2 . '-', $M . '-', $M1 . '-', $M2 . '-' );
 
-	$date     = str_replace( $searches, $replacements, $date );
-	$datetime = strtotime( $date, current_time( 'timestamp' ) );
-	$today    = current_time( 'timestamp' );
-	$diff     = $datetime - $today;
+	$new_date     = str_replace( $searches, $replacements, $date );
+	
+	//make sure we don't set expiration dates in the past
+    if ( $new_date <= date( 'Y-m-d', $now ) ) {
+        if ($has_M) {
+            $new_date = str_replace("M-", "M2-", $date);
+            $new_date = str_replace("M1-", "M2-", $date);
+        } else {
+            $new_date = str_replace("Y-", "Y2-", $date);  //assume has_Y
+            $new_date = str_replace("Y1-", "Y2-", $date);  //assume has_Y
+        }
+
+        $new_date = str_replace($searches, $replacements, $new_date);
+    }
+
+    //make sure we use the right day of the month for dates > 28
+    $dotm = pmpro_getMatches('/\-([0-3][0-9]$)/', $new_date, true);
+    if (intval($dotm) > 28) {
+        $new_date = date('Y-m-t', strtotime(substr($new_date, 0, 8) . "01"));
+    }
+	
+	$datetime = strtotime( $new_date, $now );
+	$diff     = $datetime - $now;
 	if ( $diff < 0 ) {
 		return 0;
 	} else {
