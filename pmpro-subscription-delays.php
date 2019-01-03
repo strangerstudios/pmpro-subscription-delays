@@ -3,7 +3,7 @@
 Plugin Name: Paid Memberships Pro - Subscription Delays Add On
 Plugin URI: https://www.paidmembershipspro.com/add-ons/subscription-delays/
 Description: Adds a field to delay the start of a subscription for membership levels and discount codes for variable-length trials.
-Version: .5.1
+Version: .5.2
 Author: Paid Memberships Pro
 Author URI: https://www.paidmembershipspro.com
 */
@@ -156,68 +156,15 @@ add_filter( 'pmpro_next_payment', 'pmprosd_pmpro_next_payment', 10, 3 );
 
 /*
 	Calculate how many days until a certain date (e.g. in YYYY-MM-DD format)
-
-	Some logic taken from: http://stackoverflow.com/a/654378/1154321
 	
 	NOTE: Doesn't seem like we are using this anymore, but leaving it in
 	as is in case custom code was using it.
 */
 function pmprosd_daysUntilDate( $date ) {
-	$date = strtoupper( $date );
-	
-	//vars to tell us which placeholders are being used
-    $has_M = (strpos($date, "M") !== false);
-    $has_Y = (strpos($date, "Y") !== false);
-	
-	$now = current_time( 'timestamp' );
-    $Y = $Y1 = date("Y", $now );
-    $Y2 = intval($Y) + 1;
-    $M = $M1 = date("m", $now );
-    $D = $D1 = date("j", $now );
-	
-	$date_parts = explode( '-', $date );
-    $day_part = (int)$date_parts[count($date_parts) - 1];
-	$month_part = (int)$date_parts[count($date_parts) - 2];
-	
-	if ( $M == 12 ) {
-		$M2 = '01';
-		
-		//set this year to next
-        if ( $has_Y && $day_part <= (int)$D && ( $has_M || $month_part != '12' ) ) {
-            $M = $M1 = "01";
-            $Y = $Y2;
-            $Y1 = $Y2;
-        }
-	} else {
-		$M2 = str_pad(intval($M) + 1, 2, "0", STR_PAD_LEFT);
-	}
-
-	$searches     = array( 'Y-', 'Y1-', 'Y2-', 'M-', 'M1-', 'M2-' );
-	$replacements = array( $Y . '-', $Y1 . '-', $Y2 . '-', $M . '-', $M1 . '-', $M2 . '-' );
-
-	$new_date     = str_replace( $searches, $replacements, $date );
-	
-	//make sure we don't set expiration dates in the past
-    if ( $new_date <= date( 'Y-m-d', $now ) ) {
-        if ($has_M) {
-            $new_date = str_replace("M-", "M2-", $date);
-            $new_date = str_replace("M1-", "M2-", $date);
-        } else {
-            $new_date = str_replace("Y-", "Y2-", $date);  //assume has_Y
-            $new_date = str_replace("Y1-", "Y2-", $date);  //assume has_Y
-        }
-
-        $new_date = str_replace($searches, $replacements, $new_date);
-    }
-
-    //make sure we use the right day of the month for dates > 28
-    $dotm = pmpro_getMatches('/\-([0-3][0-9]$)/', $new_date, true);
-    if (intval($dotm) > 28) {
-        $new_date = date('Y-m-t', strtotime(substr($new_date, 0, 8) . "01"));
-    }
-	
-	$datetime = strtotime( $new_date, $now );
-	$diff     = $datetime - $now;
+	$new_date = pmprosd_convert_date( $date );
+	$now_timestamp = current_time( 'timestamp' );
+	$new_date_timestamp = strtotime( $new_date, $now_timestamp );
+	$diff = $new_date_timestamp - $now_timestamp;
 	if ( $diff < 0 ) {
 		return 0;
 	} else {
@@ -231,45 +178,102 @@ function pmprosd_daysUntilDate( $date ) {
  * @since 4.4
  */
 function pmprosd_convert_date( $date ) {
-	//vars to tell us which placeholders are being used
-    $has_M = ( strpos( strtoupper( $date ), "M" ) !== false );
-    $has_Y = ( strpos( strtoupper( $date ), "Y") !== false);
-	
-	// is this date already ok?
-	if ( ! $has_M && ! $has_Y ) {
-		$new_date = $date;
-	} else {
-		// replace vars
-		$Y  = $Y1 = date( 'Y', current_time( 'timestamp' ) );
-		$Y2 = intval( $Y ) + 1;
-		$M  = $M1 = date( 'm', current_time( 'timestamp' ) );
-		if ( $M == 12 ) {
-			//set to Jan
-	        $M2 = "01";
-	
-	        //set this year to next
-	        if ($has_Y) {
-	            $Y = $Y2;
-				$Y1 = $Y2;
-	        }
-		} else {
-			$M2 = str_pad( intval( $M ) + 1, 2, '0', STR_PAD_LEFT );
-		}
+	// handle lower-cased y/m values.
+    $set_date = strtoupper($date);
 
-		$searches     = array( 'Y-', 'Y1-', 'Y2-', 'M-', 'M1-', 'M2-' );
-		$replacements = array( $Y . '-', $Y1 . '-', $Y2 . '-', $M . '-', $M1 . '-', $M2 . '-' );
+    // Change "M-" and "Y-" to "M1-" and "Y1-".
+    $set_date = preg_replace('/Y-/', 'Y1-', $set_date);
+    $set_date = preg_replace('/M-/', 'M1-', $set_date);
 
-		$new_date = str_replace( $searches, $replacements, $date );
-	}
-	
+    // Get number of months and years to add.
+    $m_pos = stripos( $set_date, 'M' );
+    $y_pos = stripos( $set_date, 'Y' );
+    if($m_pos !== false) {
+        $add_months = intval($set_date[$m_pos + 1]);
+    }
+    if($y_pos !== false) {
+        $add_years = intval($set_date[$y_pos + 1]);
+    }
+
+    // Allow new dates to be set from a custom date.
+    if(empty($current_date)) $current_date = current_time( 'timestamp' );
+
+    // Get current date parts.
+    $current_y = intval(date('Y', $current_date));
+    $current_m = intval(date('m', $current_date));
+    $current_d = intval(date('d', $current_date));
+
+    // Get set date parts.
+    $date_parts = explode( '-', $set_date);
+    $set_y = intval($date_parts[0]);
+    $set_m = intval($date_parts[1]);
+    $set_d = intval($date_parts[2]);
+
+    // Get temporary date parts.
+    $temp_y = $set_y > 0 ? $set_y : $current_y;
+    $temp_m = $set_m > 0 ? $set_m : $current_m;
+    $temp_d = $set_d;
+
+    // Add months.
+    if(!empty($add_months)) {
+        for($i = 0; $i < $add_months; $i++) {
+            // If "M1", only add months if current date of month has already passed.
+            if(0 == $i) {
+                if($temp_d < $current_d) {
+                    $temp_m++;
+                    $add_months--;
+                }
+            } else {
+                $temp_m++;
+            }
+
+            // If we hit 13, reset to Jan of next year and subtract one of the years to add.
+            if($temp_m == 13) {
+                $temp_m = 1;
+                $temp_y++;
+                $add_years--;
+            }
+        }
+    }
+
+    // Add years.
+    if(!empty($add_years)) {
+        for($i = 0; $i < $add_years; $i++) {
+            // If "Y1", only add years if current date has already passed.
+            if(0 == $i) {
+                $temp_date = strtotime(date("{$temp_y}-{$temp_m}-{$temp_d}"));
+                if($temp_date < $current_date) {
+                    $temp_y++;
+                    $add_years--;
+                }
+            } else {
+                $temp_y++;
+            }
+        }
+    }
+
+    // Pad dates if necessary.
+    $temp_m = str_pad($temp_m, 2, '0', STR_PAD_LEFT);
+    $temp_d = str_pad($temp_d, 2, '0', STR_PAD_LEFT);
+
+    // Put it all together.
+    $set_date = date("{$temp_y}-{$temp_m}-{$temp_d}");
+
+	// Make sure we use the right day of the month for dates > 28
+	// From: http://stackoverflow.com/a/654378/1154321
+    $dotm = pmpro_getMatches('/\-([0-3][0-9]$)/', $set_date, true);
+    if (intval($dotm) > 28) {
+        $set_date = date('Y-m-t', strtotime(substr($set_date, 0, 8) . "01"));
+    }
+
     // Add time
-	if ( strpos( $new_date, ':') !== false ) {
-	    $new_date = $date;
+	if ( strpos( $set_date, ':') !== false ) {
+	    $set_date = $date;
     } else {
-	    $new_date .= 'T0:0:0';
+	    $set_date .= 'T0:0:0';
     }
     
-	return $new_date;
+	return $set_date;
 }
 
 /*
