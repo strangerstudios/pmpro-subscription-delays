@@ -189,22 +189,22 @@ function pmprosd_convert_date( $date ) {
     $m_pos = stripos( $set_date, 'M' );
     $y_pos = stripos( $set_date, 'Y' );
     if($m_pos !== false) {
-				$add_months = 0;
-				$m_pos += 1;
-				while ( is_numeric( $set_date[$m_pos] ) ) {
-					$add_months *= 10;
-					$add_months += intval( $set_date[ $m_pos ] );
-					$m_pos++;
-				}
+			$add_months = 0;
+			$m_pos += 1;
+			while ( is_numeric( $set_date[$m_pos] ) ) {
+				$add_months *= 10;
+				$add_months += intval( $set_date[ $m_pos ] );
+				$m_pos++;
+			}
     }
     if($y_pos !== false) {
-				$add_years = 0;
-				$y_pos += 1;
-				while ( is_numeric( $set_date[$y_pos] ) ) {
-					$add_years *= 10;
-					$add_years += intval( $set_date[ $y_pos ] );
-					$y_pos++;
-				}
+			$add_years = 0;
+			$y_pos += 1;
+			while ( is_numeric( $set_date[$y_pos] ) ) {
+				$add_years *= 10;
+				$add_years += intval( $set_date[ $y_pos ] );
+				$y_pos++;
+			}
     }
 
     // Allow new dates to be set from a custom date.
@@ -227,7 +227,7 @@ function pmprosd_convert_date( $date ) {
     $temp_d = $set_d;
 
     // Add months.
-    if(!empty($add_months)) {
+		if(!empty($add_months)) {
         for($i = 0; $i < $add_months; $i++) {
             // If "M1", only add months if current date of month has already passed.
             if(0 == $i) {
