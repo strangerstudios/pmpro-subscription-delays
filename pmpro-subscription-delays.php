@@ -262,7 +262,7 @@ function pmprosd_convert_date( $date ) {
 	// Make sure we use the right day of the month for dates > 28
 	// From: http://stackoverflow.com/a/654378/1154321
     $dotm = pmpro_getMatches('/\-([0-3][0-9]$)/', $set_date, true);
-    if (intval($dotm) > 28) {
+    if ( $temp_m == '02' && intval($dotm) > 28 || intval($dotm) > 30 ) {
         $set_date = date('Y-m-t', strtotime(substr($set_date, 0, 8) . "01"));
     }
 
