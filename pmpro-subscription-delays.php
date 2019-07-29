@@ -105,6 +105,13 @@ function pmprosd_pmpro_profile_start_date( $start_date, $order ) {
 	} else {
 		$start_date = date( 'Y-m-d', strtotime( '+ ' . intval( $subscription_delay ) . ' Days', current_time( 'timestamp' ) ) ) . 'T0:0:0';
 	}
+	
+	$today = date( 'Y-m-d\T0:0:0', current_time( 'timestamp' ) );
+	
+	// Stripe does strange things if the profile start is before the current date!
+	if ( $start_date < $today ) {
+		$start_date = $today;
+	}
 
 	$start_date = apply_filters( 'pmprosd_modify_start_date', $start_date, $order, $subscription_delay );
 	return $start_date;
