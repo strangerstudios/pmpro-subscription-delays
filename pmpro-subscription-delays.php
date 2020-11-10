@@ -6,7 +6,16 @@ Description: Adds a field to delay the start of a subscription for membership le
 Version: .5.3
 Author: Paid Memberships Pro
 Author URI: https://www.paidmembershipspro.com
+Text Domain: pmpro-subscription-delays
+Domain Path: /languages
 */
+
+function pmprosd_pmpro_load_plugin_text_domain() {
+	load_plugin_textdomain( 'pmpro-subscription-delays', false, basename( dirname( __FILE__ ) ) . '/languages' ); 
+}
+add_action( 'plugins_loaded', 'pmprosd_pmpro_load_plugin_text_domain');
+
+
 
 // add subscription delay field to level price settings
 function pmprosd_pmpro_membership_level_after_other_settings() {
@@ -18,8 +27,8 @@ function pmprosd_pmpro_membership_level_after_other_settings() {
 		<tr>
 			<td>
 		<tr>
-			<th scope="row" valign="top"><label for="subscription_delay">Subscription Delay:</label></th>
-			<td><input name="subscription_delay" type="text" size="20" value="<?php echo esc_attr( $delay ); ?>" /> <small># of days to delay the start of the subscription. If set, this will override any trial/etc defined above.</small></td>
+			<th scope="row" valign="top"><label for="subscription_delay"><?php _e('Subscription Delay:', 'pmpro-subscription-delays'); ?></label></th>
+			<td><input name="subscription_delay" type="text" size="20" value="<?php echo esc_attr( $delay ); ?>" /> <small><?php _e('# of days to delay the start of the subscription. If set, this will override any trial/etc defined above.', 'pmpro-subscription-delays'); ?></small></td>
 		</tr>
 		</td>
 		</tr>
@@ -50,8 +59,8 @@ function pmprosd_pmpro_discount_code_after_level_settings( $code_id, $level ) {
 		<tr>
 			<td>
 		<tr>
-			<th scope="row" valign="top"><label for="subscription_delay">Subscription Delay:</label></th>
-			<td><input name="subscription_delay[]" type="text" size="20" value="<?php echo esc_attr( $delay ); ?>" /> <small># of days to delay the start of the subscription. If set, this will override any trial/etc defined above.</small></td>
+			<th scope="row" valign="top"><label for="subscription_delay"><?php _e('Subscription Delay:', 'pmpro-subscription-delays'); ?></label></th>
+			<td><input name="subscription_delay[]" type="text" size="20" value="<?php echo esc_attr( $delay ); ?>" /> <small><?php _e('# of days to delay the start of the subscription. If set, this will override any trial/etc defined above.', 'pmpro-subscription-delays'); ?></small></td>
 		</tr>
 		</td>
 		</tr>
