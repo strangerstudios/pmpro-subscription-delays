@@ -287,7 +287,10 @@ function pmprosd_convert_date( $date ) {
 	Add discount code and code id to the level object so we can use them later
 */
 function pmprosd_pmpro_discount_code_level( $level, $code_id ) {
-	$level->code_id = $code_id;
+	// Favor the code_id that's already there (e.g. when using Group Discount Codes)
+	if ( empty( $level->code_id ) ) {
+		$level->code_id = $code_id;
+	}
 	return $level;
 }
 add_filter( 'pmpro_discount_code_level', 'pmprosd_pmpro_discount_code_level', 10, 2 );
