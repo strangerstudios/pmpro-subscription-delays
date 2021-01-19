@@ -3,7 +3,7 @@
 Plugin Name: Paid Memberships Pro - Subscription Delays Add On
 Plugin URI: https://www.paidmembershipspro.com/add-ons/subscription-delays/
 Description: Adds a field to delay the start of a subscription for membership levels and discount codes for variable-length trials.
-Version: .5.3
+Version: .5.4
 Author: Paid Memberships Pro
 Author URI: https://www.paidmembershipspro.com
 Text Domain: pmpro-subscription-delays
@@ -297,7 +297,10 @@ function pmprosd_convert_date( $date ) {
 	Add discount code and code id to the level object so we can use them later
 */
 function pmprosd_pmpro_discount_code_level( $level, $code_id ) {
-	$level->code_id = $code_id;
+	// Favor the code_id that's already there (e.g. when using Group Discount Codes)
+	if ( empty( $level->code_id ) ) {
+		$level->code_id = $code_id;
+	}
 	return $level;
 }
 add_filter( 'pmpro_discount_code_level', 'pmprosd_pmpro_discount_code_level', 10, 2 );
