@@ -26,7 +26,7 @@ Set "delay" to be:
 == Changelog ==
 = .5.4 - 2020-01-19 =
 * ENHANCEMENT: Prepared for localization.
-* BUG FIX: No longer trying to give users their level back when the user is being deleted.
+* ENHANCEMENT: Added a pmprosd_current_date filter you can use in rare cases you want to apply subscription delays based on a day in the past.
 
 = .5.3 =
 * BUG FIX: Fixed issue where specific dates like 2019-07-29 would be converted to 2019-07-31 when used.
