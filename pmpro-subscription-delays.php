@@ -202,8 +202,9 @@ function pmprosd_convert_date( $date ) {
 		$add_years = intval( pmpro_getMatches( '/Y([0-9]*)/', $set_date, true ) );
     }
 
-    // Allow new dates to be set from a custom date.
-    if(empty($current_date)) $current_date = current_time( 'timestamp' );
+	// Allow new dates to be set from a custom date.
+	$current_date = current_time( 'timestamp' );
+	$current_date = apply_filters( 'pmprosd_current_date', $current_date );
 
     // Get current date parts.
     $current_y = intval(date('Y', $current_date));
