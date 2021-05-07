@@ -290,7 +290,7 @@ function pmprosd_convert_date( $date ) {
 	    $set_date .= 'T0:0:0';
     }
     
-	return $set_date;
+	return apply_filters( 'pmprosd_subscription_delay_date', $set_date, $date );
 }
 
 /*
