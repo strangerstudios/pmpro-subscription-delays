@@ -13,7 +13,7 @@ Domain Path: /languages
 function pmprosd_pmpro_load_plugin_text_domain() {
 	load_plugin_textdomain( 'pmpro-subscription-delays', false, basename( dirname( __FILE__ ) ) . '/languages' ); 
 }
-add_action( 'plugins_loaded', 'pmprosd_pmpro_load_plugin_text_domain');
+add_action( 'init', 'pmprosd_pmpro_load_plugin_text_domain');
 
 
 
@@ -27,8 +27,8 @@ function pmprosd_pmpro_membership_level_after_other_settings() {
 		<tr>
 			<td>
 		<tr>
-			<th scope="row" valign="top"><label for="subscription_delay"><?php _e('Subscription Delay:', 'pmpro-subscription-delays'); ?></label></th>
-			<td><input name="subscription_delay" type="text" size="20" value="<?php echo esc_attr( $delay ); ?>" /> <small><?php _e('# of days to delay the start of the subscription. If set, this will override any trial/etc defined above.', 'pmpro-subscription-delays'); ?></small></td>
+			<th scope="row" valign="top"><label for="subscription_delay"><?php esc_html_e('Subscription Delay:', 'pmpro-subscription-delays'); ?></label></th>
+			<td><input name="subscription_delay" type="text" size="20" value="<?php echo esc_attr( $delay ); ?>" /> <small><?php esc_html_e('# of days to delay the start of the subscription. If set, this will override any trial/etc defined above.', 'pmpro-subscription-delays'); ?></small></td>
 		</tr>
 		</td>
 		</tr>
@@ -59,8 +59,8 @@ function pmprosd_pmpro_discount_code_after_level_settings( $code_id, $level ) {
 		<tr>
 			<td>
 		<tr>
-			<th scope="row" valign="top"><label for="subscription_delay"><?php _e('Subscription Delay:', 'pmpro-subscription-delays'); ?></label></th>
-			<td><input name="subscription_delay[]" type="text" size="20" value="<?php echo esc_attr( $delay ); ?>" /> <small><?php _e('# of days to delay the start of the subscription. If set, this will override any trial/etc defined above.', 'pmpro-subscription-delays'); ?></small></td>
+			<th scope="row" valign="top"><label for="subscription_delay"><?php esc_html_e('Subscription Delay:', 'pmpro-subscription-delays'); ?></label></th>
+			<td><input name="subscription_delay[]" type="text" size="20" value="<?php echo esc_attr( $delay ); ?>" /> <small><?php esc_html_e('# of days to delay the start of the subscription. If set, this will override any trial/etc defined above.', 'pmpro-subscription-delays'); ?></small></td>
 		</tr>
 		</td>
 		</tr>
@@ -331,11 +331,13 @@ function pmprosd_level_cost_text( $cost, $level ) {
 	if ( empty( $custom_text ) ) {
 		if ( ! empty( $subscription_delay ) && is_numeric( $subscription_delay ) ) {
 			$cost  = str_replace( $find, $replace, $cost );
-			$cost .= ' after your <strong>' . $subscription_delay . ' day trial</strong>.';
+			$cost .= sprintf( __( 'after your <strong>%d</strong> day trial.', 'pmpro-subscription-delays' ), $subscription_delay );
+
 		} elseif ( ! empty( $subscription_delay ) ) {
 			$subscription_delay = pmprosd_convert_date( $subscription_delay );
 			$cost               = str_replace( $find, $replace, $cost );
-			$cost              .= ' starting ' . date_i18n( get_option( 'date_format' ), strtotime( $subscription_delay, current_time( 'timestamp' ) ) ) . '.';
+			$cost              .= __('starting', 'pmpro-subscription-delays') . date_i18n( get_option( 'date_format' ), strtotime( $subscription_delay, current_time( 'timestamp' ) ) ) . '.';
+            
 		}
 	}
 
@@ -411,8 +413,8 @@ Function to add links to the plugin row meta
 function pmprosd_plugin_row_meta( $links, $file ) {
 	if ( strpos( $file, 'pmpro-subscription-delays.php' ) !== false ) {
 		$new_links = array(
-			'<a href="' . esc_url( 'https://www.paidmembershipspro.com/add-ons/subscription-delays/' ) . '" title="' . esc_attr( __( 'View Documentation', 'pmpro' ) ) . '">' . __( 'Docs', 'pmpro' ) . '</a>',
-			'<a href="' . esc_url( 'https://paidmembershipspro.com/support/' ) . '" title="' . esc_attr( __( 'Visit Customer Support Forum', 'pmpro' ) ) . '">' . __( 'Support', 'pmpro' ) . '</a>',
+			'<a href="' . esc_url( 'https://www.paidmembershipspro.com/add-ons/subscription-delays/' ) . '" title="' . esc_attr( __( 'View Documentation', 'pmpro-subscription-delays' ) ) . '">' . __( 'Docs', 'pmpro-subscription-delays' ) . '</a>',
+			'<a href="' . esc_url( 'https://paidmembershipspro.com/support/' ) . '" title="' . esc_attr( __( 'Visit Customer Support Forum', 'pmpro-subscription-delays' ) ) . '">' . __( 'Support', 'pmpro-subscription-delays' ) . '</a>',
 		);
 		$links     = array_merge( $links, $new_links );
 	}
