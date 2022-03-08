@@ -16,6 +16,25 @@ function pmprosd_pmpro_load_plugin_text_domain() {
 add_action( 'plugins_loaded', 'pmprosd_pmpro_load_plugin_text_domain');
 
 
+/**
+ * Consider levels as trial if some delay has been applied in level settings
+ * 
+ * @param bool $r
+ * @param object $level
+ *
+ * @return bool
+ */
+function pmprosd_pmpro_is_level_trial( $r, $level ) {
+	if ( ! $r ) {
+		$delay = get_option( 'pmpro_subscription_delay_' . $level->id, '' );
+		if ( ! empty( $delay ) ) {
+			$r = true;
+		}
+	}
+
+	return $r;
+}
+add_filter( 'pmpro_is_level_trial', 'pmprosd_pmpro_is_level_trial', 10, 2 );
 
 // add subscription delay field to level price settings
 function pmprosd_pmpro_membership_level_after_other_settings() {
