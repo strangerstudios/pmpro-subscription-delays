@@ -319,8 +319,8 @@ function pmprosd_level_cost_text( $cost, $level ) {
 		$subscription_delay = get_option( 'pmpro_subscription_delay_' . $level->id, '' );
 	}
 
-	$find    = array( 'Year.', 'Month.', 'Week.', 'Year</strong>.', 'Month</strong>.', 'Week</strong>.', 'Years.', 'Months.', 'Weeks.', 'Years</strong>.', 'Months</strong>.', 'Weeks</strong>.', 'payments.', 'payments</strong>.' );
-	$replace = array( 'Year', 'Month', 'Week', 'Year</strong>', 'Month</strong>', 'Week</strong>', 'Years', 'Months', 'Weeks', 'Years</strong>', 'Months</strong>', 'Weeks</strong>', 'payments', 'payments</strong>' );
+	$find    = array( 'Year.', 'Month.', 'Week.', 'Day.', 'Year</strong>.', 'Month</strong>.', 'Week</strong>.', 'Day</strong>.', 'Years.', 'Months.', 'Weeks.', 'Days.', 'Years</strong>.', 'Months</strong>.', 'Weeks</strong>.', 'Days</strong>.', 'payments.', 'payments</strong>.' );
+	$replace = array( 'Year', 'Month', 'Week', 'Day', 'Year</strong>', 'Month</strong>', 'Week</strong>', 'Day</strong>', 'Years', 'Months', 'Weeks', 'Days', 'Years</strong>', 'Months</strong>', 'Weeks</strong>', 'Days</strong>', 'payments', 'payments</strong>' );
 
 	if ( function_exists( 'pmpro_getCustomLevelCostText' ) ) {
 		$custom_text = pmpro_getCustomLevelCostText( $level->id );
