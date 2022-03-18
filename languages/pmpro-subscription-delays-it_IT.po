@@ -1,0 +1,76 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Paid Memberships Pro - Subscription Delays Add On\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-07-28 16:54+0000\n"
+"PO-Revision-Date: 2022-03-18 16:59+0100\n"
+"Last-Translator: Mirco Babini <mirkolofio@gmail.com>\n"
+"Language-Team: \n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"X-Generator: Poedit 3.0.1\n"
+"X-Loco-Version: 2.4.4; wp-5.5.3\n"
+
+#: pmpro-subscription-delays.php:31 pmpro-subscription-delays.php:63
+msgid ""
+"# of days to delay the start of the subscription. If set, this will override "
+"any trial/etc defined above."
+msgstr ""
+"numero di giorni per ritardare l'inizio dell’iscrizione. Se impostato, "
+"questo sostituirà qualsiasi prova / ecc. definita sopra."
+
+#. Description of the plugin
+msgid ""
+"Adds a field to delay the start of a subscription for membership levels and "
+"discount codes for variable-length trials."
+msgstr ""
+"Aggiunge un campo per ritardare l’inizio di una iscrizione per i piani e i "
+"codici sconto con un periodo di valutazione a durata variabile."
+
+#: pmpro-subscription-delays.php:334
+#, php-format
+msgid "after your <strong>%d</strong> day trial."
+msgstr "dopo <strong>%d</strong> giorni di prova."
+
+#: pmpro-subscription-delays.php:416
+msgid "Docs"
+msgstr "Documentazione"
+
+#. Author URI of the plugin
+msgid "https://www.paidmembershipspro.com"
+msgstr "https://www.paidmembershipspro.com"
+
+#. URI of the plugin
+msgid "https://www.paidmembershipspro.com/add-ons/subscription-delays/"
+msgstr "https://www.paidmembershipspro.com/add-ons/subscription-delays/"
+
+#. Author of the plugin
+msgid "Paid Memberships Pro"
+msgstr "Paid Memberships Pro"
+
+#. Name of the plugin
+msgid "Paid Memberships Pro - Subscription Delays Add On"
+msgstr "Paid Memberships Pro - Subscription Delays Add On"
+
+#: pmpro-subscription-delays.php:339
+msgid "starting"
+msgstr "a partire da"
+
+#: pmpro-subscription-delays.php:30 pmpro-subscription-delays.php:62
+msgid "Subscription Delay:"
+msgstr "Ritardo Iscrizione:"
+
+#: pmpro-subscription-delays.php:417
+msgid "Support"
+msgstr "Supporto"
+
+#: pmpro-subscription-delays.php:416
+msgid "View Documentation"
+msgstr "Documentazione"
+
+#: pmpro-subscription-delays.php:417
+msgid "Visit Customer Support Forum"
+msgstr "Visita il Forum del Supporto Clienti"
