@@ -336,7 +336,7 @@ function pmprosd_level_cost_text( $cost, $level ) {
 		} elseif ( ! empty( $subscription_delay ) ) {
 			$subscription_delay = pmprosd_convert_date( $subscription_delay );
 			$cost               = str_replace( $find, $replace, $cost );
-			$cost              .= ' ' . __('starting', 'pmpro-subscription-delays') . date_i18n( get_option( 'date_format' ), strtotime( $subscription_delay, current_time( 'timestamp' ) ) ) . '.';
+			$cost              .= ' ' . __('starting', 'pmpro-subscription-delays') . ' ' . date_i18n( get_option( 'date_format' ), strtotime( $subscription_delay, current_time( 'timestamp' ) ) ) . '.';
             
 		}
 	}
