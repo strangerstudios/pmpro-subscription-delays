@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Paid Memberships Pro - Subscription Delays Add On\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-10 15:05+0000\n"
+"POT-Creation-Date: 2021-07-28 16:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -15,24 +15,29 @@ msgstr ""
 "X-Generator: Loco https://localise.biz/\n"
 "X-Loco-Version: 2.4.4; wp-5.5.3"
 
-#: pmpro-subscription-delays.php:30 pmpro-subscription-delays.php:62
-msgid "Subscription Delay:"
-msgstr ""
-
 #: pmpro-subscription-delays.php:31 pmpro-subscription-delays.php:63
 msgid ""
 "# of days to delay the start of the subscription. If set, this will override "
 "any trial/etc defined above."
 msgstr ""
 
-#. Name of the plugin
-msgid "Paid Memberships Pro - Subscription Delays Add On"
-msgstr ""
-
 #. Description of the plugin
 msgid ""
 "Adds a field to delay the start of a subscription for membership levels and "
 "discount codes for variable-length trials."
+msgstr ""
+
+#: pmpro-subscription-delays.php:334
+#, php-format
+msgid "after your <strong>%d</strong> day trial."
+msgstr ""
+
+#: pmpro-subscription-delays.php:416
+msgid "Docs"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://www.paidmembershipspro.com"
 msgstr ""
 
 #. URI of the plugin
@@ -43,6 +48,26 @@ msgstr ""
 msgid "Paid Memberships Pro"
 msgstr ""
 
-#. Author URI of the plugin
-msgid "https://www.paidmembershipspro.com"
+#. Name of the plugin
+msgid "Paid Memberships Pro - Subscription Delays Add On"
+msgstr ""
+
+#: pmpro-subscription-delays.php:339
+msgid "starting"
+msgstr ""
+
+#: pmpro-subscription-delays.php:30 pmpro-subscription-delays.php:62
+msgid "Subscription Delay:"
+msgstr ""
+
+#: pmpro-subscription-delays.php:417
+msgid "Support"
+msgstr ""
+
+#: pmpro-subscription-delays.php:416
+msgid "View Documentation"
+msgstr ""
+
+#: pmpro-subscription-delays.php:417
+msgid "Visit Customer Support Forum"
 msgstr ""
