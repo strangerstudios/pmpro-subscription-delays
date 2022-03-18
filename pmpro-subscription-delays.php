@@ -319,8 +319,19 @@ function pmprosd_level_cost_text( $cost, $level ) {
 		$subscription_delay = get_option( 'pmpro_subscription_delay_' . $level->id, '' );
 	}
 
-	$find    = array( 'Year.', 'Month.', 'Week.', 'Year</strong>.', 'Month</strong>.', 'Week</strong>.', 'Years.', 'Months.', 'Weeks.', 'Years</strong>.', 'Months</strong>.', 'Weeks</strong>.', 'payments.', 'payments</strong>.' );
-	$replace = array( 'Year', 'Month', 'Week', 'Year</strong>', 'Month</strong>', 'Week</strong>', 'Years', 'Months', 'Weeks', 'Years</strong>', 'Months</strong>', 'Weeks</strong>', 'payments', 'payments</strong>' );
+	$labels   = [ 'Year', 'Years', 'Month', 'Months', 'Week', 'Weeks', 'Day', 'Days', 'payments' ];
+	$patterns = [
+		'%s.'          => '%s',
+		'%s</strong>.' => '%s</strong>'
+	];
+
+	$find = $replace = array();
+	foreach( $labels as $label ){
+		foreach( $patterns as $pattern_find => $pattern_replace ){
+			$find[] = sprintf( $pattern_find, __( $label, 'paid-memberships-pro'));
+			$replace[] = sprintf( $pattern_replace, __( $label, 'paid-memberships-pro'));
+		}
+	}
 
 	if ( function_exists( 'pmpro_getCustomLevelCostText' ) ) {
 		$custom_text = pmpro_getCustomLevelCostText( $level->id );
