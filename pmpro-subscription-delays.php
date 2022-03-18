@@ -326,10 +326,10 @@ function pmprosd_level_cost_text( $cost, $level ) {
 	];
 
 	$find = $replace = array();
-	foreach( $labels as $label ){
-		foreach( $patterns as $pattern_find => $pattern_replace ){
-			$find[] = sprintf( $pattern_find, __( $label, 'paid-memberships-pro'));
-			$replace[] = sprintf( $pattern_replace, __( $label, 'paid-memberships-pro'));
+	foreach ( $labels as $label ) {
+		foreach ( $patterns as $pattern_find => $pattern_replace ) {
+			$find[]    = sprintf( $pattern_find, __( $label, 'paid-memberships-pro' ) );
+			$replace[] = sprintf( $pattern_replace, __( $label, 'paid-memberships-pro' ) );
 		}
 	}
 
