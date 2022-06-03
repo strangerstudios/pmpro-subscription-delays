@@ -432,3 +432,104 @@ function pmprosd_plugin_row_meta( $links, $file ) {
 	return $links;
 }
 add_filter( 'plugin_row_meta', 'pmprosd_plugin_row_meta', 10, 2 );
+
+/**
+ * Hook into the PMPro core expirations warning cron to send a reminder
+ *
+ * @since TBD
+ *
+ * @return voic
+ */
+function pmprosd_subscription_delay_reminder(){
+
+	global $wpdb;
+
+	$today = date( "Y-m-d H:i:s", current_time( "timestamp" ) );
+
+	$pmpro_email_days_before_charge = apply_filters( "pmprosd_reminder_email_days", 7 );
+
+	$notification_time = strtotime( "{$today} +{$pmpro_email_days_before_charge} days", current_time( 'timestamp' ) );
+
+	///TO DO - We need to check if they've been notified by checking if the user meta pmprosd_reminder is present
+	
+	$sqlQuery = $wpdb->prepare(
+		"SELECT 
+			mu.user_id, 
+			mu.membership_id, 
+			um.meta_value AS payment 
+		FROM wp_pmpro_memberships_users AS mu 
+		LEFT JOIN wp_usermeta AS um ON um.user_id = mu.user_id 
+		WHERE um.meta_key = '%s' 
+		AND um.meta_value <> '' 
+		AND mu.status = 'active' 
+		AND um.meta_value <= '%s'
+			",
+		"pmprosd_trialing_until",
+		$notification_time,
+	);
+
+	
+
+	if(defined('PMPRO_CRON_LIMIT'))
+		$sqlQuery .= " LIMIT " . PMPRO_CRON_LIMIT;
+
+	$charge_coming = $wpdb->get_results($sqlQuery);
+
+	foreach( $charge_coming as $e ) {
+
+		$send_email = apply_filters("pmprosd_send_reminder_email", true, $e->user_id);
+		
+		if( $send_email ) {
+			//send an email		
+
+			$euser = get_userdata($e->user_id);
+			
+			if ( ! empty( $euser ) ) {
+			
+				$email_recipient = new PMProEmail();
+				$email_recipient->template = 'pmprosd_reminder';
+				$email_recipient->email = $euser->user_email;
+				// $email_recipient->data = array_merge( $data, $new_data );
+				$email_recipient->sendEmail();
+
+				if(current_user_can('manage_options')) {
+					printf(__("Membership payment delay reminder email sent to %s. ", 'paid-memberships-pro' ), $euser->user_email);
+				} else {
+					echo ". ";
+				}
+			}
+		}
+
+		//delete all user meta for this key to prevent duplicate user meta rows
+		delete_user_meta($e->user_id, "pmprosd_reminder");
+
+		//update user meta so we don't email them again
+		update_user_meta($e->user_id, "pmprosd_reminder", $today);
+	}
+
+}
+add_action( 'pmpro_cron_expiration_warnings', 'pmprosd_subscription_delay_reminder' );
+
+function pmprosd_template_callback( $templates ) {
+
+	$templates['pmprosd_reminder'] = array(
+		'subject' => esc_html( sprintf( __( 'Your membership payment at !!sitename!! will be charged soon.', 'pmpro-subscription-delays' ), get_option( 'blogname' ) ) ),
+		'description' => __( 'Subscription Delay Payment Reminder', 'pmpro-subscription-delays' ),
+		'body' => pmprosd_payment_reminder(),
+		'help_text' => __( 'This email is sent to the member before their subscription delay payment is approaching, at an interval based on the pmprosd_reminder_email_days filter.', 'pmpro-subscription-delays' )
+	);	
+	
+	return $templates;
+}
+add_filter( 'pmproet_templates', 'pmprosd_template_callback');
+
+function pmprosd_payment_reminder() {
+	ob_start(); ?>
+	
+	<p><?php esc_html_e( 'The next payment for your membership will be charged soon by !!sitename!!!', 'pmpro-gift-levels' ); ?></p>
+
+	<?php
+	$body = ob_get_contents();
+	ob_end_clean();
+	return $body;
+}
