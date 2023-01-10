@@ -486,7 +486,7 @@ function pmprosd_subscription_delay_reminder(){
 		}
 
 		$send_email = apply_filters("pmprosd_send_reminder_email", true, $e->user_id, $member_levels );
-var_dump($user_reminded);
+
 		/**
 		 * We need to check if: 
 		 * 1. Are we allowed to send reminder emails
