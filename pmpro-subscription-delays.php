@@ -443,6 +443,8 @@ add_filter( 'plugin_row_meta', 'pmprosd_plugin_row_meta', 10, 2 );
 function pmprosd_subscription_delay_reminder(){
 
 	global $wpdb;
+	
+	$remind_member = $level_to_remind = $user_reminded = false;
 
 	$today = date( "Y-m-d H:i:s", current_time( "timestamp" ) );
 
@@ -457,27 +459,41 @@ function pmprosd_subscription_delay_reminder(){
 			um.meta_value AS payment 
 		FROM wp_pmpro_memberships_users AS mu 
 		LEFT JOIN wp_usermeta AS um ON um.user_id = mu.user_id 
-		WHERE um.meta_key = '%s' 
+		WHERE um.meta_key LIKE '%s' 
 		AND um.meta_value <> '' 
 		AND mu.status = 'active' 
 		AND um.meta_value <= '%s'
 			",
-		"pmprosd_reminder_sent",
+		"%pmprosd_trialing_until%",
 		esc_sql( $notification_time ),
-	);
-
+	);	
 	
-
 	if(defined('PMPRO_CRON_LIMIT'))
 		$sqlQuery .= " LIMIT " . PMPRO_CRON_LIMIT;
 
 	$charge_coming = $wpdb->get_results($sqlQuery);
 
-	foreach( $charge_coming as $e ) {
+	foreach( $charge_coming as $e ) {		
 
-		$send_email = apply_filters("pmprosd_send_reminder_email", true, $e->user_id);
-		
-		if( $send_email ) {
+		$member_levels = pmpro_getMembershipLevelsForUser( $e->user_id );		
+
+		foreach( $member_levels as $mlevel ) {
+			if( $mlevel->ID == $e->membership_id ) {
+				//This is the level we need to remind the user of				
+				$level_to_remind = intval( $mlevel->ID );
+				$user_reminded = get_user_meta( $e->user_id, "pmprosd_reminder_sent_".$level_to_remind, true );				
+			}
+		}
+
+		$send_email = apply_filters("pmprosd_send_reminder_email", true, $e->user_id, $member_levels );
+var_dump($user_reminded);
+		/**
+		 * We need to check if: 
+		 * 1. Are we allowed to send reminder emails
+		 * 2. Are we meant to remind users of this level (in case they have more than one level)
+		 * 3. Has the user not been reminded already
+		 */
+		if( $send_email && ! $user_reminded ) {
 			//send an email		
 
 			$euser = get_userdata($e->user_id);
@@ -499,7 +515,7 @@ function pmprosd_subscription_delay_reminder(){
 		}
 
 		//update user meta so we don't email them again
-		update_user_meta($e->user_id, "pmprosd_reminder_sent_", $today);
+		update_user_meta( $e->user_id, "pmprosd_reminder_sent_".$level_to_remind, $today );
 	}
 
 }
