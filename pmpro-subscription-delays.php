@@ -133,21 +133,23 @@ add_filter( 'pmpro_profile_start_date', 'pmprosd_pmpro_profile_start_date', 10, 
  * @since .4
  */
 function pmprosd_pmpro_after_checkout( $user_id ) {
-	$level = pmpro_getMembershipLevelForUser( $user_id );
+	$levels = pmpro_getMembershipLevelsForUser( $user_id );
 
-	if ( ! empty( $level ) ) {
-		$subscription_delay = get_option( 'pmpro_subscription_delay_' . $level->id, '' );
-		if ( $subscription_delay ) {
-			if ( ! is_numeric( $subscription_delay ) ) {
-				$trialing_until = strtotime( pmprosd_convert_date( $subscription_delay ), current_time( 'timestamp' ) );
+	if ( ! empty( $levels ) ) {
+		foreach( $levels as $level ) {
+			$subscription_delay = get_option( 'pmpro_subscription_delay_' . $level->id, '' );
+			if ( $subscription_delay ) {
+				if ( ! is_numeric( $subscription_delay ) ) {
+					$trialing_until = strtotime( pmprosd_convert_date( $subscription_delay ), current_time( 'timestamp' ) );
+				} else {
+					$trialing_until = strtotime( '+' . $subscription_delay . ' Days', current_time( 'timestamp' ) );
+				}
+
+				update_user_meta( $user_id, 'pmprosd_trialing_until_'.$level->id, $trialing_until );
 			} else {
-				$trialing_until = strtotime( '+' . $subscription_delay . ' Days', current_time( 'timestamp' ) );
+				delete_user_meta( $user_id, 'pmprosd_trialing_until_'.$level->id );
 			}
-
-			update_user_meta( $user_id, 'pmprosd_trialing_until_'.$level->id, $trialing_until );
-		} else {
-			delete_user_meta( $user_id, 'pmprosd_trialing_until_'.$level->id );
-		}
+		}		
 	}
 }
 add_action( 'pmpro_after_checkout', 'pmprosd_pmpro_after_checkout' );
