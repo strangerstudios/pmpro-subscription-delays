@@ -438,7 +438,7 @@ add_filter( 'plugin_row_meta', 'pmprosd_plugin_row_meta', 10, 2 );
  *
  * @since TBD
  *
- * @return voic
+ * @return void
  */
 function pmprosd_subscription_delay_reminder(){
 
@@ -449,8 +449,6 @@ function pmprosd_subscription_delay_reminder(){
 	$pmpro_email_days_before_charge = apply_filters( "pmprosd_reminder_email_days", 7 );
 
 	$notification_time = strtotime( "{$today} +{$pmpro_email_days_before_charge} days", current_time( 'timestamp' ) );
-
-	///TO DO - We need to check if they've been notified by checking if the user meta pmprosd_reminder is present
 	
 	$sqlQuery = $wpdb->prepare(
 		"SELECT 
@@ -464,8 +462,8 @@ function pmprosd_subscription_delay_reminder(){
 		AND mu.status = 'active' 
 		AND um.meta_value <= '%s'
 			",
-		"pmprosd_trialing_until",
-		$notification_time,
+		"pmprosd_reminder_sent",
+		esc_sql( $notification_time ),
 	);
 
 	
@@ -500,11 +498,8 @@ function pmprosd_subscription_delay_reminder(){
 			}
 		}
 
-		//delete all user meta for this key to prevent duplicate user meta rows
-		delete_user_meta($e->user_id, "pmprosd_reminder");
-
 		//update user meta so we don't email them again
-		update_user_meta($e->user_id, "pmprosd_reminder", $today);
+		update_user_meta($e->user_id, "pmprosd_reminder_sent_", $today);
 	}
 
 }
@@ -516,7 +511,7 @@ function pmprosd_template_callback( $templates ) {
 		'subject' => esc_html( sprintf( __( 'Your membership payment at !!sitename!! will be charged soon.', 'pmpro-subscription-delays' ), get_option( 'blogname' ) ) ),
 		'description' => __( 'Subscription Delay Payment Reminder', 'pmpro-subscription-delays' ),
 		'body' => pmprosd_payment_reminder(),
-		'help_text' => __( 'This email is sent to the member before their subscription delay payment is approaching, at an interval based on the pmprosd_reminder_email_days filter.', 'pmpro-subscription-delays' )
+		'help_text' => esc_html__( 'This email is sent to the member before their subscription delay payment is approaching, at an interval based on the pmprosd_reminder_email_days filter.', 'pmpro-subscription-delays' )
 	);	
 	
 	return $templates;
@@ -526,7 +521,7 @@ add_filter( 'pmproet_templates', 'pmprosd_template_callback');
 function pmprosd_payment_reminder() {
 	ob_start(); ?>
 	
-	<p><?php esc_html_e( 'The next payment for your membership will be charged soon by !!sitename!!!', 'pmpro-gift-levels' ); ?></p>
+	<p><?php esc_html_e( 'The next payment for your membership will be charged soon by !!sitename!!!', 'pmpro-subscription-delays' ); ?></p>
 
 	<?php
 	$body = ob_get_contents();
