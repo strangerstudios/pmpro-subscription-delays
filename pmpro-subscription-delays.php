@@ -147,6 +147,7 @@ function pmprosd_pmpro_after_checkout( $user_id ) {
 
 				update_user_meta( $user_id, 'pmprosd_trialing_until_'.$level->id, $trialing_until );
 			} else {
+				delete_user_meta( $user_id, 'pmprosd_trialing_until' );
 				delete_user_meta( $user_id, 'pmprosd_trialing_until_'.$level->id );
 			}
 		}		
@@ -161,16 +162,25 @@ add_action( 'pmpro_after_checkout', 'pmprosd_pmpro_after_checkout' );
  */
 function pmprosd_pmpro_next_payment( $timestamp, $user_id, $order_status ) {
 	// find the last order for this user
-	if ( ! empty( $user_id ) && ! empty( $timestamp ) ) {
-		$member_levels = pmpro_getMembershipLevelForUser( $user_id );
-		if ( ! empty( $member_levels ) ) {
-			foreach( $member_levels as $mlevel ) {
-				$trialing_until = get_user_meta( $user_id, 'pmprosd_trialing_until_'.$mlevel->id, true );
-				if ( ! empty( $trialing_until ) && $trialing_until > current_time( 'timestamp' ) ) {
-					$timestamp = $trialing_until;
-				}
+	if ( ! empty( $user_id ) && ! empty( $timestamp ) ) {		
+		$trialing_until = get_user_meta( $user_id, 'pmprosd_trialing_until', true );
+		if( ! empty( $trialing_until ) ) {
+			//Adds backwards compat for users who would still be using pmprosd_trialing_until
+			if ( ! empty( $trialing_until ) && $trialing_until > current_time( 'timestamp' ) ) {
+				$timestamp = $trialing_until;
 			}
-		}		
+		} else {
+			$member_levels = pmpro_getMembershipLevelForUser( $user_id );
+			if ( ! empty( $member_levels ) ) {
+				foreach( $member_levels as $mlevel ) {
+					$trialing_until = get_user_meta( $user_id, 'pmprosd_trialing_until_'.$mlevel->id, true );
+					if ( ! empty( $trialing_until ) && $trialing_until > current_time( 'timestamp' ) ) {
+						$timestamp = $trialing_until;
+					}
+				}
+			}	
+		}
+			
 	}
 
 	return $timestamp;
