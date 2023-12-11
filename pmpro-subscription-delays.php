@@ -133,6 +133,13 @@ add_filter( 'pmpro_profile_start_date', 'pmprosd_pmpro_profile_start_date', 10, 
  * @since .4
  */
 function pmprosd_pmpro_after_checkout( $user_id ) {
+	// If the PMPro_Subscription class exists, subs table will track the next payment date and we don't need to do anything here.
+	if ( class_exists( 'PMPro_Subscription' ) ) {
+		// We can also clear existing user meta from pre-3.0.
+		delete_user_meta( $user_id, 'pmprosd_trialing_until' );
+		return;
+	}
+
 	$level = pmpro_getMembershipLevelForUser( $user_id );
 
 	if ( ! empty( $level ) ) {
@@ -158,6 +165,12 @@ add_action( 'pmpro_after_checkout', 'pmprosd_pmpro_after_checkout' );
  * @since .4
  */
 function pmprosd_pmpro_next_payment( $timestamp, $user_id, $order_status ) {
+	// This filter likely won't ever be called after the PMPro v3.0 release, but we'll keep it here for now for pre-3.0 sites.
+	// If this filter is called post-3.0 for some reason, we'll bail as subs table should already have the correct next payment date.
+	if ( class_exists( 'PMPro_Subscription' ) ) {
+		return $timestamp;
+	}
+
 	// find the last order for this user
 	if ( ! empty( $user_id ) && ! empty( $timestamp ) ) {
 		$trialing_until = get_user_meta( $user_id, 'pmprosd_trialing_until', true );
