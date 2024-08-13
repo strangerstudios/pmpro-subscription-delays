@@ -2,8 +2,8 @@
 Contributors: strangerstudios
 Tags: paid memberships pro, pmpro, memberships, ecommerce
 Requires at least: 5.2
-Tested up to: 6.4
-Stable tag: 0.5.6
+Tested up to: 6.6
+Stable tag: 0.5.7
 
 Adds a "delay" field to PMPro membership levels and discount codes, allowing you to set a variable-length period between your initial payment (if required) and recurring subscription payment.
 
@@ -24,6 +24,9 @@ Set "delay" to be:
 1. That's it. No settings.
 
 == Changelog ==
+= 0.5.7 - 2024-08-13 =
+* BUG FIX: Fixed an issue where subscription delays set on discount codes were not being applied. #45 (@dparker1005)
+
 = 0.5.6 - 2023-12-11 =
 * DEPRECATED: No longer tracking the `pmprosd_trialing_until` date in user meta when using PMPro v3.0+. Tracking next payment dates is now handled by the PMPro Subscriptions table in core PMPro, which also adds MMPU-compatibility. #42 (@dparker1005)
 
