@@ -89,19 +89,24 @@ function pmprosd_pmpro_profile_start_date( $start_date, $order ) {
 	$subscription_delay = null;
 
 	// if a discount code is used, we default to the setting there
-	if ( ! empty( $order->discount_code ) ) {
-		global $wpdb;
-
-		// get code id
-		$code_id = $wpdb->get_var( "SELECT id FROM $wpdb->pmpro_discount_codes WHERE code = '" . esc_sql( $order->discount_code ) . "' LIMIT 1" );
-		if ( ! empty( $code_id ) ) {
-			// we have a code
-			$delays = pmpro_getDCSDs( $code_id );
+	if ( ! empty( $order->discount_code_id ) ) {
+		// The order has already been saved with a discount code.
+		$delays = pmpro_getDCSDs( $order->discount_code_id );
+		if ( ! empty( $delays[ $order->membership_id ] ) ) {
+			$subscription_delay = $delays[ $order->membership_id ];
+		}
+	} elseif( pmpro_is_checkout() && ! empty( $order->getMembershipLevelAtCheckout()->discount_code ) ) {
+		// We are at checekout and the discount code use has not been added to the order yet.
+		$discount_code = $order->getMembershipLevelAtCheckout()->discount_code;
+		$code_obj = new PMPro_Discount_Code( $discount_code );
+		if ( ! empty( $code_obj->id ) ) {
+			$delays = pmpro_getDCSDs( $code_obj->id );
 			if ( ! empty( $delays[ $order->membership_id ] ) ) {
 				$subscription_delay = $delays[ $order->membership_id ];
 			}
 		}
 	} else {
+		// No discount code, so we default to the setting on the level.
 		$subscription_delay = get_option( 'pmpro_subscription_delay_' . $order->membership_id, '' );
 	}
 
