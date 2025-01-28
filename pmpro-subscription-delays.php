@@ -15,33 +15,73 @@ function pmprosd_pmpro_load_plugin_text_domain() {
 }
 add_action( 'init', 'pmprosd_pmpro_load_plugin_text_domain');
 
-
-
 // add subscription delay field to level price settings
 function pmprosd_pmpro_membership_level_after_other_settings() {
 	$level_id = intval( $_REQUEST['edit'] );
 	$delay    = get_option( 'pmpro_subscription_delay_' . $level_id, '' );
+	$delay_renewing_member = get_option( 'pmpro_subscription_delay_renewing_member_' . $level_id, 'user_new_member_delay' );
+	$delay_renewing_member_custom = get_option( 'pmpro_subscription_delay_renewing_member_custom_' . $level_id, '' );
 	?>
-	<table>
-		<tbody class="form-table">
-		<tr>
-			<td>
-		<tr>
-			<th scope="row" valign="top"><label for="subscription_delay"><?php esc_html_e('Subscription Delay:', 'pmpro-subscription-delays'); ?></label></th>
-			<td><input name="subscription_delay" type="text" size="20" value="<?php echo esc_attr( $delay ); ?>" /> <small><?php esc_html_e('# of days to delay the start of the subscription. If set, this will override any trial/etc defined above.', 'pmpro-subscription-delays'); ?></small></td>
-		</tr>
-		</td>
-		</tr>
+	<h3 class="topborder"><?php esc_html_e('Subscription Delay', 'pmpro-subscription-delays'); ?></h3>
+	<p><?php esc_html_e( 'Modify the start of the subscription by a specific number of days or a dynamic date pattern, for example to offer calendar year memberships. These settings override the trial settings defined above.', 'pmpro-subscription-delays' ); ?></p>
+	<table class="form-table">
+		<tbody>
+			<tr>
+				<th scope="row" valign="top"><label for="subscription_delay"><?php esc_html_e('Delay for New Members', 'pmpro-subscription-delays'); ?></label></th>
+				<td>
+					<input id="subscription_delay" name="subscription_delay" type="text" size="20" value="<?php echo esc_attr( $delay ); ?>" />
+					<p class="description"><?php esc_html_e( 'This delay applies to someone checking out for this level that does not already have the active level.', 'pmpro-subscription-delays' ); ?></p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row" valign="top"><label for="subscription_delay_renewing_member"><?php esc_html_e('Delay for Renewing Members', 'pmpro-subscription-delays'); ?></label></th>
+				<td>
+					<select id="subscription_delay_renewing_member" name="subscription_delay_renewing_member">
+						<option value="user_new_member_delay" <?php selected( $delay_renewing_member, 'user_new_member_delay' ); ?>><?php esc_html_e( 'Inherit from new member delay', 'pmpro-subscription-delays' ); ?></option>
+						<option value="use_level_setting" <?php selected( $delay_renewing_member, 'use_level_setting' ); ?>><?php esc_html_e( 'Inherit from level settings', 'pmpro-subscription-delays' ); ?></option>
+						<option value="current_subscription_renewal_date" <?php selected( $delay_renewing_member, 'current_subscription_renewal_date' ); ?>><?php esc_html_e( 'Start subscription on current expiration or next payment date', 'pmpro-subscription-delays' ); ?></option>
+						<option value="current_subscription_custom" <?php selected( $delay_renewing_member, 'current_subscription_custom' ); ?>><?php esc_html_e( 'Set a custom subscription delay', 'pmpro-subscription-delays' ); ?></option>
+					</select>
+					<p class="description"><?php esc_html_e( 'This delay applies to a member renewing their exact current level. Use this setting to maintain their current expiration or next payment date, if desired.', 'pmpro-subscription-delays' ); ?></p>
+				</td>
+			</tr>
+			<tr id="subscription_delay_renewing_member_custom" <?php if ( $delay_renewing_member !== 'current_subscription_custom' ) { ?>style="display: none;"<?php } ?>>
+				<th scope="row" valign="top">
+					<label for="subscription_delay_custom"><?php esc_html_e('Custom Delay for Renewing Members', 'pmpro-subscription-delays'); ?></label>
+				</th>
+				<td>
+					<input id="subscription_delay_custom" name="subscription_delay_custom" type="text" size="20" value="<?php echo esc_attr( $delay_renewing_member_custom ); ?>" />
+					<p class="description"><?php esc_html_e( 'This delay applies to someone renewing their exact current level.', 'pmpro-subscription-delays' ); ?></p>
+				</td>
+			</tr>
+			<script>
+				jQuery(document).ready(function() {
+					jQuery('#subscription_delay_renewing_member').change(function() {
+						if(jQuery(this).val() == 'current_subscription_custom') {
+							jQuery('#subscription_delay_renewing_member_custom').show();
+						} else {
+							jQuery('#subscription_delay_renewing_member_custom').hide();
+							jQuery('#subscription_delay_custom').val('');
+						}
+					});
+				});
+			</script>
 		</tbody>
 	</table>
 	<?php
 }
-add_action( 'pmpro_membership_level_after_other_settings', 'pmprosd_pmpro_membership_level_after_other_settings' );
+add_action( 'pmpro_membership_level_after_trial_settings', 'pmprosd_pmpro_membership_level_after_other_settings' );
 
-// save subscription delays for the code when the code is saved/added
+// save subscription delays for the level when the level is saved/added.
 function pmprosd_pmpro_save_membership_level( $level_id ) {
-	$subscription_delay = $_REQUEST['subscription_delay'];  // subscription delays for levels checked
+	$subscription_delay = $_REQUEST['subscription_delay'];
 	update_option( 'pmpro_subscription_delay_' . $level_id, $subscription_delay );
+
+	$subscription_delay_renewing_member = $_REQUEST['subscription_delay_renewing_member'];
+	update_option( 'pmpro_subscription_delay_renewing_member_' . $level_id, $subscription_delay_renewing_member );
+
+	$subscription_delay_renewing_member_custom = $_REQUEST['subscription_delay_custom'];
+	update_option( 'pmpro_subscription_delay_renewing_member_custom_' . $level_id, $subscription_delay_renewing_member_custom );
 }
 add_action( 'pmpro_save_membership_level', 'pmprosd_pmpro_save_membership_level' );
 
@@ -107,7 +147,7 @@ function pmprosd_pmpro_profile_start_date( $start_date, $order ) {
 		}
 	} else {
 		// No discount code, so we default to the setting on the level.
-		$subscription_delay = get_option( 'pmpro_subscription_delay_' . $order->membership_id, '' );
+		$subscription_delay = pmprosd_getDelayForLevelID( $order->membership_id );
 	}
 
 	if ( empty( $subscription_delay ) ) {
@@ -334,7 +374,7 @@ function pmprosd_level_cost_text( $cost, $level ) {
 			$subscription_delay = $all_delays[ $level->id ];
 		}
 	} else {
-		$subscription_delay = get_option( 'pmpro_subscription_delay_' . $level->id, '' );
+		$subscription_delay = pmprosd_getDelayForLevelID( $level->id );
 	}
 
 	$labels   = [ 'Year', 'Years', 'Month', 'Months', 'Week', 'Weeks', 'Day', 'Days', 'payments' ];
@@ -357,16 +397,18 @@ function pmprosd_level_cost_text( $cost, $level ) {
 		$custom_text = null;
 	}
 
+	// If we have no delay, return the cost as is.
+	if ( empty( $subscription_delay ) ) {
+		return $cost;
+	}
 	if ( empty( $custom_text ) ) {
-		if ( ! empty( $subscription_delay ) && is_numeric( $subscription_delay ) ) {
+		if ( is_numeric( $subscription_delay ) ) {
 			$cost  = str_replace( $find, $replace, $cost );
 			$cost .= sprintf( __( 'after your <strong>%d</strong> day trial.', 'pmpro-subscription-delays' ), $subscription_delay );
-
-		} elseif ( ! empty( $subscription_delay ) ) {
+		} else {
 			$subscription_delay = pmprosd_convert_date( $subscription_delay );
 			$cost               = str_replace( $find, $replace, $cost );
 			$cost              .= ' ' . __('starting', 'pmpro-subscription-delays') . ' ' . date_i18n( get_option( 'date_format' ), strtotime( $subscription_delay, current_time( 'timestamp' ) ) ) . '.';
-            
 		}
 	}
 
@@ -412,6 +454,41 @@ function pmprosd_getDelay( $level_id, $code_id = null ) {
 		$subscription_delay = get_option( 'pmpro_subscription_delay_' . $level_id, '' );
 		return $subscription_delay;
 	}
+}
+
+/**
+ * Get the delay for a specific level ID.
+ */
+function pmprosd_getDelayForLevelID( $level_id ) {
+	$user_id = get_current_user_id();
+	if ( empty( $user_id ) ) {
+		return get_option( 'pmpro_subscription_delay_' . $level_id, '' );
+	}
+
+	$user_level = pmpro_getSpecificMembershipLevelForUser( $user_id, $level_id );
+	$subscription_delay = get_option( 'pmpro_subscription_delay_renewing_member_' . $level_id, 'user_new_member_delay' );
+	if ( $subscription_delay == 'current_subscription_custom' ) {
+		$subscription_delay = get_option( 'pmpro_subscription_delay_renewing_member_custom_' . $level_id, '' );
+	} elseif ( $subscription_delay == 'user_new_member_delay' ) {
+		$subscription_delay = get_option( 'pmpro_subscription_delay_' . $level_id, '' );
+	} elseif ( $subscription_delay == 'current_subscription_renewal_date' ) {
+		$current_subscriptions = PMPro_Subscription::get_subscriptions_for_user( $user_id, $level_id );
+		if ( ! empty( $current_subscriptions ) ) {
+			$subscription_start_date = $current_subscriptions[0]->get_next_payment_date();
+		}
+		// See if the user has an expiration date set.
+		if ( empty( $subscription_start_date ) ) {
+			$clevel = pmpro_getSpecificMembershipLevelForUser( $user_id, $level_id );
+			$subscription_start_date = $clevel->enddate;
+		}
+		$subscription_delay = $subscription_start_date < current_time( 'timestamp' ) ? '' : $subscription_start_date;
+		$subscription_delay = date( 'Y-m-d H:i:s', (int) $subscription_delay );
+	} else {
+		// Inherit level settings.
+		$subscription_delay = '';
+	}
+
+	return $subscription_delay;
 }
 
 /**
