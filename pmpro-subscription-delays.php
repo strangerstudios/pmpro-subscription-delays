@@ -479,12 +479,19 @@ function pmprosd_getDelayForLevelID( $level_id ) {
 		// See if the user has an expiration date set.
 		if ( empty( $subscription_start_date ) ) {
 			$clevel = pmpro_getSpecificMembershipLevelForUser( $user_id, $level_id );
-			$subscription_start_date = $clevel->enddate;
+			if ( ! empty( $clevel->enddate ) ) {
+				$subscription_start_date = $clevel->enddate;
+			}
 		}
-		$subscription_delay = $subscription_start_date < current_time( 'timestamp' ) ? '' : $subscription_start_date;
-		$subscription_delay = date( 'Y-m-d H:i:s', (int) $subscription_delay );
+
+		// Convert the date to a valid delay value.
+		if ( ! empty( $subscription_start_date ) ) {
+			$subscription_delay = $subscription_start_date < current_time( 'timestamp' ) ? '' : $subscription_start_date;
+			$subscription_delay = date( 'Y-m-d H:i:s', (int) $subscription_delay );
+		} else {
+			$subscription_delay = '';
+		}
 	} else {
-		// Inherit level settings.
 		$subscription_delay = '';
 	}
 
