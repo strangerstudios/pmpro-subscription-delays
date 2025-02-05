@@ -98,7 +98,8 @@ function pmprosd_pmpro_profile_start_date( $start_date, $order ) {
 	} elseif( pmpro_is_checkout() && ! empty( $order->getMembershipLevelAtCheckout()->discount_code ) ) {
 		// We are at checekout and the discount code use has not been added to the order yet.
 		$discount_code = $order->getMembershipLevelAtCheckout()->discount_code;
-		$code_obj = new PMPro_Discount_Code( $discount_code );
+		$code_obj = new PMPro_Discount_Code();
+		$code_obj->get_discount_code_by_code( $discount_code );
 		if ( ! empty( $code_obj->id ) ) {
 			$delays = pmpro_getDCSDs( $code_obj->id );
 			if ( ! empty( $delays[ $order->membership_id ] ) ) {
