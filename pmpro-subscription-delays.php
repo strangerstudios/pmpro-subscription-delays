@@ -3,7 +3,7 @@
 Plugin Name: Paid Memberships Pro - Subscription Delays Add On
 Plugin URI: https://www.paidmembershipspro.com/add-ons/subscription-delays/
 Description: Adds a field to delay the start of a subscription for membership levels and discount codes for variable-length trials.
-Version: 0.5.7
+Version: 0.6
 Author: Paid Memberships Pro
 Author URI: https://www.paidmembershipspro.com
 Text Domain: pmpro-subscription-delays
@@ -129,14 +129,14 @@ function pmprosd_pmpro_profile_start_date( $start_date, $order ) {
 		$start_date = $today;
 	}
 
-	$start_date = apply_filters( 'pmprosd_modify_start_date', $start_date, $order, $subscription_delay );
+	$start_date = apply_filters_deprecated( 'pmprosd_modify_start_date', array( $start_date, $order, $subscription_delay ) , '0.6', 'pmpro_checkout_level' );
 	return $start_date;
 }
 
 /**
  * Add the profile start date to a checkout level.
  *
- * @since TBD
+ * @since 0.6
  *
  * @param object $level The PMPro Level object.
  */
@@ -179,7 +179,7 @@ function pmprosd_pmpro_checkout_level( $level ) {
  * Hook the pmprosd_pmpro_checkout_level() function if running PMPro v3.4+.
  * Otherwise, hook the legacy pmprosd_pmpro_profile_start_date() function.
  *
- * @since TBD
+ * @since 0.6
  */
 function pmprosd_hook_pmpro_profile_start_date() {
 	if ( version_compare( PMPRO_VERSION, '3.4', '>=' ) ) {
