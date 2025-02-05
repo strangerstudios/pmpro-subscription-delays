@@ -85,6 +85,7 @@ function pmprosd_pmpro_save_discount_code_level( $code_id, $level_id ) {
 add_action( 'pmpro_save_discount_code_level', 'pmprosd_pmpro_save_discount_code_level', 10, 2 );
 
 // update subscription start date based on the discount code used or levels subscription start date
+// This is now only used for PMPro versions < 3.4.
 function pmprosd_pmpro_profile_start_date( $start_date, $order ) {
 	$subscription_delay = null;
 
@@ -130,7 +131,63 @@ function pmprosd_pmpro_profile_start_date( $start_date, $order ) {
 	$start_date = apply_filters( 'pmprosd_modify_start_date', $start_date, $order, $subscription_delay );
 	return $start_date;
 }
-add_filter( 'pmpro_profile_start_date', 'pmprosd_pmpro_profile_start_date', 10, 2 );
+
+/**
+ * Add the profile start date to a checkout level.
+ *
+ * @since TBD
+ *
+ * @param object $level The PMPro Level object.
+ */
+function pmprosd_pmpro_checkout_level( $level ) {
+	// Get the subscription delay for this level or discount code (if used).
+	$subscription_delay = null;
+	if ( ! empty( $level->code_id ) ) {
+		$delays = pmpro_getDCSDs( $level->code_id );
+		if ( ! empty( $delays[ $level->id ] ) ) {
+			$subscription_delay = $delays[ $level->id ];
+		}
+	} else {
+		$subscription_delay = get_option( 'pmpro_subscription_delay_' . $level->id, '' );
+	}
+
+	// If there is not a subscription delay, return the level object as is.
+	if ( empty( $subscription_delay ) ) {
+		return $level;
+	}
+
+	// Convert the subscription delay to a usable date.
+	if ( ! is_numeric( $subscription_delay ) ) {
+		$level->profile_start_date = pmprosd_convert_date( $subscription_delay );
+	} else {
+		$level->profile_start_date = date( 'Y-m-d', strtotime( '+ ' . intval( $subscription_delay ) . ' Days', current_time( 'timestamp' ) ) ) . 'T0:0:0';
+	}
+
+	// Make sure the profile start date is not before the current date.
+	$today = date( 'Y-m-d\T0:0:0', current_time( 'timestamp' ) );
+	if ( $level->profile_start_date < $today ) {
+		$level->profile_start_date = $today;
+	}
+
+	// We are not using the pmprosd_modify_start_date filter here because we do not have an order object.
+	// If you need to modify the profile start date on checkout, you can use the pmpro_checkout_level filter.
+	return $level;
+}
+
+/**
+ * Hook the pmprosd_pmpro_checkout_level() function if running PMPro v3.4+.
+ * Otherwise, hook the legacy pmprosd_pmpro_profile_start_date() function.
+ *
+ * @since TBD
+ */
+function pmprosd_hook_pmpro_profile_start_date() {
+	if ( version_compare( PMPRO_VERSION, '3.4', '>=' ) ) {
+		add_filter( 'pmpro_checkout_level', 'pmprosd_pmpro_checkout_level', 10, 2 );
+	} else {
+		add_filter( 'pmpro_profile_start_date', 'pmprosd_pmpro_profile_start_date', 10, 2 );
+	}
+}
+add_action( 'init', 'pmprosd_hook_pmpro_profile_start_date' );
 
 /**
  * Save a "pmprosd_trialing_until" user meta after checkout.
