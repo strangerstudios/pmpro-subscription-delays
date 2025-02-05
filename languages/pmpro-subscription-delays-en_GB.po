@@ -1,15 +1,15 @@
-# Copyright (C) 2024 Paid Memberships Pro
+# Copyright (C) 2025 Paid Memberships Pro
 # This file is distributed under the same license as the Paid Memberships Pro - Subscription Delays Add On plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Paid Memberships Pro - Subscription Delays Add On 0.5.7\n"
+"Project-Id-Version: Paid Memberships Pro - Subscription Delays Add On 0.6\n"
 "Report-Msgid-Bugs-To: info@paidmembershipspro.com\n"
 "Last-Translator: Paid Memberships Pro <info@paidmembershipspro.com>\n"
 "Language-Team: Paid Memberships Pro <info@paidmembershipspro.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-08-13T14:44:53+00:00\n"
+"POT-Creation-Date: 2025-02-05T18:39:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: pmpro-subscription-delays\n"
@@ -54,35 +54,41 @@ msgstr "https://www.paidmembershipspro.com"
 #: pmpro-subscription-delays.php:345
 #: pmpro-subscription-delays.php:358
 #: pmpro-subscription-delays.php:363
+#: pmpro-subscription-delays.php:421
 msgid "after your <strong>%d</strong> day trial."
 msgstr ""
 
 #: pmpro-subscription-delays.php:350
 #: pmpro-subscription-delays.php:363
 #: pmpro-subscription-delays.php:368
+#: pmpro-subscription-delays.php:426
 msgid "starting"
 msgstr ""
 
 #: pmpro-subscription-delays.php:427
 #: pmpro-subscription-delays.php:440
 #: pmpro-subscription-delays.php:445
+#: pmpro-subscription-delays.php:503
 msgid "View Documentation"
 msgstr ""
 
 #: pmpro-subscription-delays.php:427
 #: pmpro-subscription-delays.php:440
 #: pmpro-subscription-delays.php:445
+#: pmpro-subscription-delays.php:503
 msgid "Docs"
 msgstr ""
 
 #: pmpro-subscription-delays.php:428
 #: pmpro-subscription-delays.php:441
 #: pmpro-subscription-delays.php:446
+#: pmpro-subscription-delays.php:504
 msgid "Visit Customer Support Forum"
 msgstr ""
 
 #: pmpro-subscription-delays.php:428
 #: pmpro-subscription-delays.php:441
 #: pmpro-subscription-delays.php:446
+#: pmpro-subscription-delays.php:504
 msgid "Support"
 msgstr ""
