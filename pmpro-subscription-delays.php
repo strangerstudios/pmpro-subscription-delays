@@ -182,6 +182,11 @@ function pmprosd_pmpro_checkout_level( $level ) {
  * @since 0.6
  */
 function pmprosd_hook_pmpro_profile_start_date() {
+	// If PMPRO_VERSION is not defined, bail.
+	if ( ! defined( 'PMPRO_VERSION' ) ) {
+		return;
+	}
+
 	if ( version_compare( PMPRO_VERSION, '3.4', '>=' ) ) {
 		add_filter( 'pmpro_checkout_level', 'pmprosd_pmpro_checkout_level', 10, 2 );
 	} else {
