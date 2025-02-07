@@ -397,7 +397,9 @@ function pmprosd_level_cost_text( $cost, $level ) {
 			$subscription_delay = $all_delays[ $level->id ];
 		}
 	} else {
-		$subscription_delay = get_option( 'pmpro_subscription_delay_' . $level->id, '' );
+		//check the level isn't null
+		$pmpro_level_id = isset( $level->id ) ? $level->id : 0;
+		$subscription_delay = get_option( 'pmpro_subscription_delay_' . $pmpro_level_id, '' );
 	}
 
 	$labels   = [ 'Year', 'Years', 'Month', 'Months', 'Week', 'Weeks', 'Day', 'Days', 'payments' ];
