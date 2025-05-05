@@ -1,6 +1,6 @@
 ---
 name: "🐛 Bug Report"
-about: Report a bug if something isn't working as expected in Paid Memberships Pro.
+about: Report a bug if something isn't working as expected in Paid Memberships Pro - Subscription Delays.
 title: ''
 labels: 'bug'
 assignees: ''
@@ -24,13 +24,13 @@ If applicable, please attach a screenshot to make your issue clearer.
 A clear and concise description of what you expected to happen.
 
 **Isolating the problem (mark completed items with an [x]):**
-- [ ] I have deactivated other plugins and confirmed this bug occurs when only Paid Memberships Pro plugin is active.
-- [ ] This bug happens with a default WordPress theme active, or [Memberlite](https://wordpress.org/themes/memberlite/).
+- [ ] I have deactivated other plugins and confirmed this bug occurs when only Paid Memberships Pro and Paid Memberships Pro - Subscription Delays is active.
+- [ ] This bug happens with a default WordPress theme active, or [Memberlite](https://www.paidmembershipspro.com/themes/memberlite/).
 - [ ] I can reproduce this bug consistently using the steps above.
 
 **WordPress Environment**
 <details>
 ```
-Please share non-sensitive information about your hosting environment such as WordPress version, PHP version, Paid Memberships Pro and any related plugins versions.
+Please share non-sensitive information about your hosting environment such as WordPress version, PHP version, Paid Memberships Pro, Paid Memberships Pro - Subscription Delays and any related plugins versions.
 ```
 </details>
