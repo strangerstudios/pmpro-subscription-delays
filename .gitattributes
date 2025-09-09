@@ -1,3 +1,5 @@
 # Items to ignore when downloading a zip
  .gitattributes export-ignore
  .github export-ignore
+ pmpro-subscription-delays-banner.png export-ignore
+ README.md export-ignore
