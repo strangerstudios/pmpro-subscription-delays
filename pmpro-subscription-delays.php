@@ -456,7 +456,7 @@ function pmpro_getDCSDs( $code_id ) {
 	if ( ! empty( $all_delays ) && ! empty( $all_delays[ $code_id ] ) ) {
 		return $all_delays[ $code_id ];
 	} else {
-		return false;
+		return array();
 	}
 }
 
