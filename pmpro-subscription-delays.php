@@ -390,6 +390,13 @@ add_filter( 'pmpro_discount_code_level', 'pmprosd_pmpro_discount_code_level', 10
 	Change the Level Cost Text
 */
 function pmprosd_level_cost_text( $cost, $level ) {
+	// Bail if we don't have a level object with an ID to inspect. Third-party
+	// code occasionally fires the pmpro_level_cost_text filter without a level,
+	// which would otherwise warn on $level->code_id / $level->id access.
+	if ( ! is_object( $level ) || empty( $level->id ) ) {
+		return $cost;
+	}
+
 	if ( ! empty( $level->code_id ) ) {
 		$all_delays = pmpro_getDCSDs( $level->code_id );
 
