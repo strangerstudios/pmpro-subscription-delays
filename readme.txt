@@ -2,8 +2,8 @@
 Contributors: strangerstudios
 Tags: paid memberships pro, pmpro, memberships, ecommerce
 Requires at least: 5.2
-Tested up to: 6.7
-Stable tag: 0.6.1
+Tested up to: 6.9
+Stable tag: 0.6.2
 
 Adds a "delay" field to PMPro membership levels and discount codes, allowing you to set a variable-length period between your initial payment (if required) and recurring subscription payment.
 
@@ -24,6 +24,10 @@ Set "delay" to be:
 1. That's it. No settings.
 
 == Changelog ==
+= 0.6.2 - 2026-05-04 =
+* BUG FIX: Resolved a PHP 8.1+ "automatic conversion of false to array is deprecated" notice when saving discount codes by returning an empty array from `pmpro_getDCSDs()` instead of `false` when no delays are stored. #52 (@dparker1005)
+* BUG FIX: Avoided a PHP warning in `pmprosd_level_cost_text()` when the `pmpro_level_cost_text` filter is fired without a valid level object. #50 (@MaximilianoRicoTabo)
+
 = 0.6.1 - 2025-02-06 =
 * BUG FIX: Fixed an issue that could cause errors if the core PMPro plugin was not active. #49 (@dparker1005)
 
