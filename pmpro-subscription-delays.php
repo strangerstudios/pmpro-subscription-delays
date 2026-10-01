@@ -10,6 +10,10 @@ Text Domain: pmpro-subscription-delays
 Domain Path: /languages
 */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 function pmprosd_pmpro_load_plugin_text_domain() {
 	load_plugin_textdomain( 'pmpro-subscription-delays', false, basename( dirname( __FILE__ ) ) . '/languages' ); 
 }
@@ -19,7 +23,7 @@ add_action( 'init', 'pmprosd_pmpro_load_plugin_text_domain');
 
 // add subscription delay field to level price settings
 function pmprosd_pmpro_membership_level_after_other_settings() {
-	$level_id = intval( $_REQUEST['edit'] );
+	$level_id = isset( $_REQUEST['edit'] ) ? intval( $_REQUEST['edit'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display on the level edit page.
 	$delay    = get_option( 'pmpro_subscription_delay_' . $level_id, '' );
 	?>
 	<table>
@@ -40,7 +44,8 @@ add_action( 'pmpro_membership_level_after_other_settings', 'pmprosd_pmpro_member
 
 // save subscription delays for the code when the code is saved/added
 function pmprosd_pmpro_save_membership_level( $level_id ) {
-	$subscription_delay = $_REQUEST['subscription_delay'];  // subscription delays for levels checked
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce and capability are verified by PMPro core before the level is saved.
+	$subscription_delay = isset( $_REQUEST['subscription_delay'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['subscription_delay'] ) ) : '';  // subscription delays for levels checked
 	update_option( 'pmpro_subscription_delay_' . $level_id, $subscription_delay );
 }
 add_action( 'pmpro_save_membership_level', 'pmprosd_pmpro_save_membership_level' );
@@ -72,8 +77,10 @@ add_action( 'pmpro_discount_code_after_level_settings', 'pmprosd_pmpro_discount_
 
 // save subscription delays for the code when the code is saved/added
 function pmprosd_pmpro_save_discount_code_level( $code_id, $level_id ) {
-	$all_levels_a         = $_REQUEST['all_levels'];                            // array of level ids checked for this code
-	$subscription_delay_a = $_REQUEST['subscription_delay'];    // subscription delays for levels checked
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Nonce and capability are verified by PMPro core before the discount code is saved.
+	$all_levels_a         = isset( $_REQUEST['all_levels'] ) ? array_map( 'intval', (array) $_REQUEST['all_levels'] ) : array(); // array of level ids checked for this code
+	$subscription_delay_a = isset( $_REQUEST['subscription_delay'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_REQUEST['subscription_delay'] ) ) : array(); // subscription delays for levels checked
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 	if ( ! empty( $all_levels_a ) ) {
 		$key                 = array_search( $level_id, $all_levels_a );              // which level is it in the list?
@@ -491,6 +498,7 @@ function pmprosd_pmpro_subscribe_order( $order, $gateway ) {
 	if ( $order->gateway == 'authorizenet' ) {
 		if ( ! empty( $order->discount_code ) ) {
 			global $wpdb;
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- PMPro custom table; the code is escaped with esc_sql() and quoted.
 			$code_id            = $wpdb->get_var( "SELECT id FROM $wpdb->pmpro_discount_codes WHERE code = '" . esc_sql( $order->discount_code ) . "' LIMIT 1" );
 			$subscription_delay = pmprosd_getDelay( $order->membership_id, $code_id );
 		} else {
