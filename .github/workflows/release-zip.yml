@@ -1,0 +1,23 @@
+name: Release Zip
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build zip with clean folder name
+        run: |
+          slug="${GITHUB_REPOSITORY#*/}"
+          git archive --format=zip --prefix="$slug/" -o "$slug.zip" HEAD
+
+      - name: Attach zip to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" "${GITHUB_REPOSITORY#*/}.zip" --clobber
